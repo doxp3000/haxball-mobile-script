@@ -304,7 +304,7 @@ function createAboutButton() {
     button.innerHTML = '<i class="icon-attention"></i><div>Discord</div>';
 
     button.addEventListener("click", function() {
-    window.open("https://discord.gg", "_blank");
+    window.open("https://discord.gg");
     });
     insertAfter(body.querySelector(".buttons .spacer"), button)
 }
