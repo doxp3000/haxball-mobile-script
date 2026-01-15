@@ -150,7 +150,7 @@ function setupCountryFilter() {
 function setupCopyright() {
     copyrightHandler.setAttribute("data-hook", "copyright");
     copyrightHandler.setAttribute("style", "text-align:center;position:absolute;bottom:15px;width:100%; display: block");
-    copyrightHandler.innerHTML = '2024 Vixel Dev. Original game by Mario Carbajal (@basro)';
+    copyrightHandler.innerHTML = 'HaxBall Mod';
     document.body.appendChild(copyrightHandler);
 }
 
@@ -307,21 +307,29 @@ function createAboutButton() {
     
     button.style.backgroundColor = "#5865F2";
     button.style.color = "white";
+    button.style.transition = "all 0.3s ease"; // Para que el cambio de color sea suave
 
-    // Usamos mousedown en lugar de click por si el juego intercepta los clicks
-    button.addEventListener("mousedown", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const discordURL = "https://discord.gg/TU_LINK"; // <--- CAMBIA ESTO
+    button.addEventListener("click", function() {
+        const discordURL = "https://discord.gg/TU_LINK"; // <--- TU LINK AQUÍ
 
-        // Intento 1: Abrir en ventana nueva usando la ventana superior (fuera del iframe)
-        try {
-            window.top.open(discordURL, '_blank');
-        } catch (err) {
-            // Intento 2: Si el 1 falla, cambiar la ubicación de la ventana actual
-            window.top.location.href = discordURL;
-        }
+        // Intentar copiar al portapapeles
+        navigator.clipboard.writeText(discordURL).then(() => {
+            // Efecto visual de "Copiado"
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="icon-ok"></i><div>¡Copiado!</div>';
+            button.style.backgroundColor = "#43b581"; // Color verde éxito de Discord
+            
+            // Volver al estado original después de 1.5 segundos
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.style.backgroundColor = "#5865F2";
+            }, 1500);
+            
+            console.log("Link de Discord copiado al portapapeles");
+        }).catch(err => {
+            // Por si el navegador es muy antiguo y no soporta clipboard API
+            alert("Link: " + discordURL); 
+        });
     });
 
     let container = body.querySelector(".roomlist-view .buttons");
