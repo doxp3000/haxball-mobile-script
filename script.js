@@ -11,7 +11,7 @@ let gameFrame = document.querySelector('.gameframe').contentWindow;
 let body;
 
 const tips = [
-    "Haxball Mobile Mod V1.1",
+    "Haxball Mobile Mod V1",
     
 ];
 
