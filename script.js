@@ -299,34 +299,34 @@ function createURLButton() {
 }
 
 function createAboutButton() {
-    // Si ya existe, no lo creamos de nuevo
     if (getByDataHook('aboutbtn')) return;
 
     let button = document.createElement("button");
     button.setAttribute("data-hook", "aboutbtn");
     button.innerHTML = '<i class="icon-link"></i><div>Discord</div>';
     
-    // Estilo visual para que resalte
     button.style.backgroundColor = "#5865F2";
     button.style.color = "white";
 
-    button.addEventListener("click", function() {
-        console.log("Abriendo Discord...");
-        window.open("https://discord.gg/TU_LINK", "_blank");
+    // Usamos mousedown en lugar de click por si el juego intercepta los clicks
+    button.addEventListener("mousedown", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const discordURL = "https://discord.gg/TU_LINK"; // <--- CAMBIA ESTO
+
+        // Intento 1: Abrir en ventana nueva usando la ventana superior (fuera del iframe)
+        try {
+            window.top.open(discordURL, '_blank');
+        } catch (err) {
+            // Intento 2: Si el 1 falla, cambiar la ubicación de la ventana actual
+            window.top.location.href = discordURL;
+        }
     });
 
-    // Buscamos el contenedor de botones de la lista de salas
     let container = body.querySelector(".roomlist-view .buttons");
-    
     if (container) {
-        container.appendChild(button); // Esto lo pone al final de los botones
-    } else {
-        // Si falla el anterior, intenta el método original
-        try {
-            insertAfter(body.querySelector(".buttons .spacer"), button);
-        } catch(e) {
-            console.error("No se pudo insertar el botón de Discord");
-        }
+        container.appendChild(button);
     }
 }
 
