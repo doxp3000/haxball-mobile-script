@@ -310,7 +310,7 @@ function createAboutButton() {
     button.style.transition = "all 0.3s ease"; // Para que el cambio de color sea suave
 
     button.addEventListener("click", function() {
-        const discordURL = "https://discord.gg/TU_LINK"; // <--- TU LINK AQUÍ
+        const discordURL = "https://discord.gg/q27tF7CG5";
 
         // Intentar copiar al portapapeles
         navigator.clipboard.writeText(discordURL).then(() => {
