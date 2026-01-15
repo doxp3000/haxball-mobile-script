@@ -364,6 +364,21 @@ function setupGameUI() {
         chat.querySelector('input').addEventListener('blur', function() { inputStyle.display = 'none'; });
         firstTime = false;
     }
+  function createDiscordButton() {
+    let button = document.createElement("button");
+    button.setAttribute("data-hook", "discord-btn");
+    // Usamos el icono de "link" que ya viene en el juego o texto
+    button.innerHTML = '<i class="icon-link"></i><div>Discord</div>';
+    button.style.backgroundColor = "#5865F2"; // Color oficial de Discord
+    button.style.color = "white";
+
+    button.addEventListener("click", function() {
+        window.open("https://discord.gg/TU_LINK", "_blank"); // Cambia TU_LINK por el tuyo
+    });
+
+    // Lo insertamos al lado del botón de "About us" o "Join"
+    insertAfter(getByDataHook('aboutbtn'), button);
+  }
 }
 
 ///////////////////////////////////////// CHAT /////////////////////////////////////////
