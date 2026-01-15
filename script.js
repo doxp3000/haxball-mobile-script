@@ -299,15 +299,37 @@ function createURLButton() {
 }
 
 function createAboutButton() {
+    // Si ya existe, no lo creamos de nuevo
+    if (getByDataHook('aboutbtn')) return;
+
     let button = document.createElement("button");
     button.setAttribute("data-hook", "aboutbtn");
-    button.innerHTML = '<i class="icon-attention"></i><div>Discord</div>';
+    button.innerHTML = '<i class="icon-link"></i><div>Discord</div>';
+    
+    // Estilo visual para que resalte
+    button.style.backgroundColor = "#5865F2";
+    button.style.color = "white";
 
     button.addEventListener("click", function() {
-    window.open("https://discord.gg");
+        console.log("Abriendo Discord...");
+        window.open("https://discord.gg/TU_LINK", "_blank");
     });
-    insertAfter(body.querySelector(".buttons .spacer"), button)
+
+    // Buscamos el contenedor de botones de la lista de salas
+    let container = body.querySelector(".roomlist-view .buttons");
+    
+    if (container) {
+        container.appendChild(button); // Esto lo pone al final de los botones
+    } else {
+        // Si falla el anterior, intenta el método original
+        try {
+            insertAfter(body.querySelector(".buttons .spacer"), button);
+        } catch(e) {
+            console.error("No se pudo insertar el botón de Discord");
+        }
+    }
 }
+
 
 function filterCountries(button) {
     const geoData = localStorage.getItem('geo_override') || localStorage.getItem('geo');
