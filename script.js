@@ -180,36 +180,20 @@ function updateUI() {
         copyright(true);
         showControls(false);
     } else if (body.querySelector('.settings-view')) {
-        //Settings
-        copyright(false);
-        if (inputOptionsHandler.getAttribute("hidden") != null) {
-            showControls(false);
-        }
-        try {
-            const videoSec = getByDataHook('videosec')
-            if (videoSec.children.length == 10) {
-                videoSec.lastChild.remove();
-                videoSec.lastChild.remove();
-                videoSec.lastChild.remove();
-            }
-        } catch {}
-        if (!getByDataHook('newinputbtn')) createInputButton();
-        canResetJoystick = true;
-    } else if (body.querySelector('.g-recaptcha-response')) {
-        //Captha
-        copyright(false);
+    // Settings
+    copyright(false);
+    
+    // Si la ventana de opciones de input NO está abierta, mostramos los botones normales
+    if (inputOptionsHandler.getAttribute("hidden") != null) {
         showControls(false);
-        resetJoystick();
-        canResetJoystick = true;
-    } else if (body.querySelector('.game-view') && !body.querySelector('.room-view')) {
-        //In game
-        if (canResetJoystick) {
-            copyright(false);
-            showControls(true);
-            setupGameUI();
-            resetJoystick();
-            canResetJoystick = false;
-        }
+        // Creamos el botón de controles de Android
+        if (!getByDataHook('newinputbtn')) createInputButton();
+        // Creamos el botón de Background SOLO en la pantalla principal de settings
+        if (!getByDataHook('bg-input-container')) createBackgroundButton();
+    }
+    
+    canResetJoystick = true;
+
     } else if (body.querySelector('.game-view') && !body.querySelector('.room-link-view')) {
         //Room admin
         copyright(false);
