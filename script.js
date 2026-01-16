@@ -179,21 +179,40 @@ function updateUI() {
         //Create room
         copyright(true);
         showControls(false);
-    } else if (body.querySelector('.settings-view')) {
-    // Estamos en la pestaña de ajustes
-    copyright(false);
+function createBackgroundButton() {
+    // Buscamos el contenedor principal de settings
+    let container = body.querySelector('.settings-view .section.selected');
+    if (!container) return;
 
-    // Verificamos si la ventana de opciones de input está oculta
-    if (inputOptionsHandler.getAttribute("hidden") != null) {
-        showControls(false); // Oculta el joystick mientras configuras
-        
-        // Si el botón de configurar controles NO existe, lo creamos
-        if (!getByDataHook('newinputbtn')) {
-            createInputButton();
-        }
-    }
-    canResetJoystick = true;
+    // Si estamos dentro del menú de "Controls", no dibujamos el fondo para no romper el input
+    if (inputOptionsHandler.getAttribute("hidden") == null) return;
+
+    let bgDiv = document.createElement("div");
+    bgDiv.setAttribute("data-hook", "bg-input-container");
+    bgDiv.style.cssText = "width: 100%; margin-top: 15px; pointer-events: auto;";
+    bgDiv.innerHTML = '<label style="display:block; font-size:12px; margin-bottom:5px;">FONDO (URL):</label>';
+
+    let input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Link de imagen...";
+    input.value = localStorage.getItem('custom_bg') || "";
+    input.style.cssText = "width: 100%; background: #fff; color: #000; padding: 5px; border-radius: 4px;";
+
+    // Esto es CLAVE: Evita que el input del fondo rompa los inputs de los controles
+    const stop = (e) => e.stopPropagation();
+    input.addEventListener("mousedown", stop);
+    input.addEventListener("touchstart", stop);
+    input.addEventListener("keydown", stop);
+
+    input.addEventListener("change", function() {
+        setGameBackground(input.value.trim());
+    });
+
+    bgDiv.appendChild(input);
+    container.appendChild(bgDiv);
 }
+
+
     } else if (body.querySelector('.game-view') && !body.querySelector('.room-link-view')) {
         //Room admin
         copyright(false);
