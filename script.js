@@ -629,14 +629,46 @@ function setupControls() {
     joystick.addEventListener('touchmove', handleTouchMove);
     joystick.addEventListener('touchend', handleTouchEnd);
 
+    // --- AQUÍ EMPIEZA EL BOTÓN DE PATEAR CON TURBO ---
     kickButton = document.createElement("button");
     kickButton.setAttribute("class", "neo rounded sizer");
     kickButton.setAttribute("view", "hidden");
     kickButton.setAttribute("float", "");
     kickButton.setAttribute("id", "kick");
     kickButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M290 49c-16 0-32 14-38 36-6 25 5 48 22 52 18 5 39-10 45-35 7-25-5-48-22-52l-7-1zM89 68 78 87c32 16 63 34 96 47l28-12c-40-16-77-34-113-54zm148 56c-48 26-98 42-154 62l9 16c52-16 111-33 161-56-7-6-12-13-16-22zm30 35c-22 11-46 20-71 29-20 45-28 95-37 140l-2 11-101-40-16 26 130 60 3-4 15-29a1672 1672 0 0 0 79-193zm-31 135-17 36c25 37 57 79 95 109l23-17c-36-40-73-85-101-128zm188 73a48 48 0 0 0-48 48 48 48 0 0 0 48 48 48 48 0 0 0 48-48 48 48 0 0 0-48-48z"/></svg>';
-    kickButton.addEventListener('touchstart', function() { kick('keydown') });
-    kickButton.addEventListener('touchend', function() { kick('keyup') });
+
+    let turboInterval = null;
+
+    kickButton.addEventListener('touchstart', function(e) { 
+        if(e.cancelable) e.preventDefault();
+        // Patear una vez al tocar
+        kick('keydown'); 
+        
+        // Activar el Turbo cada 45ms
+        if (!turboInterval) {
+            turboInterval = setInterval(() => {
+                kick('keyup');
+                setTimeout(() => kick('keydown'), 5);
+            }, 45);
+        }
+    });
+
+    kickButton.addEventListener('touchend', function(e) { 
+        if(e.cancelable) e.preventDefault();
+        if (turboInterval) {
+            clearInterval(turboInterval);
+            turboInterval = null;
+        }
+        kick('keyup'); 
+    });
+
+    kickButton.addEventListener('touchcancel', function() {
+        if (turboInterval) {
+            clearInterval(turboInterval);
+            turboInterval = null;
+        }
+        kick('keyup');
+    });
 
     document.body.appendChild(joystick);
     document.body.appendChild(kickButton);
@@ -650,28 +682,6 @@ function setupControls() {
 
     resetJoystick();
 }
-
-
-
-
-
-
-
-
-
-
-let previousDigitalStickState = "";
-let previousAnalogStickState = "";
-let isXButtonPressed = false;
-
-window.addEventListener("gamepadconnected", (event) => {
-  console.log("Gamepad connected:", event.gamepad);
-  checkGamepadState(event.gamepad);
-});
-
-window.addEventListener("gamepaddisconnected", (event) => {
-  console.log("Gamepad disconnected:", event.gamepad);
-});
 
 function checkGamepadState(gamepad) {
   requestAnimationFrame(() => {
