@@ -179,54 +179,37 @@ function updateUI() {
         //Create room
         copyright(true);
         showControls(false);
-    function createBackgroundButton() {
-    if (getByDataHook('bg-input-container')) return;
-
-    let container = body.querySelector('.settings-view .section.selected');
-    if (!container) return;
-
-    let bgDiv = document.createElement("div");
-    bgDiv.setAttribute("data-hook", "bg-input-container");
-    bgDiv.style.cssText = "width: 100%; margin-top: 15px; pointer-events: auto; padding: 10px; background: #1a2125; border-radius: 8px;";
-    bgDiv.innerHTML = '<label style="display:block; font-size:12px; color:#fff; margin-bottom:5px;">FONDO PERSONALIZADO:</label>';
-
-    let input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = "Pega el link .png o .jpg aquí...";
-    input.value = localStorage.getItem('custom_bg') || "";
-    input.style.cssText = "width: 100%; background: #fff; color: #000; padding: 8px; border-radius: 4px; border: none;";
-
-    let applyBtn = document.createElement("button");
-    applyBtn.innerHTML = "Aplicar Fondo";
-    applyBtn.style.cssText = "width: 100%; margin-top: 8px; background: #4a5568; color: white; padding: 5px; border-radius: 4px;";
-
-    // Función para aplicar
-    const applyBG = () => {
-        let url = input.value.trim();
-        if (url.startsWith("https")) {
-            setGameBackground(url);
-        } else if (url === "") {
-            setGameBackground("");
+    } else if (body.querySelector('.settings-view')) {
+        //Settings
+        copyright(false);
+        if (inputOptionsHandler.getAttribute("hidden") != null) {
+            showControls(false);
         }
-    };
-
-    // Bloqueamos interferencias del juego
-    const stop = (e) => e.stopPropagation();
-    input.addEventListener("mousedown", stop);
-    input.addEventListener("touchstart", stop);
-    input.addEventListener("input", applyBG); // <--- CAMBIO: Aplica mientras escribes/pegas
-
-    applyBtn.addEventListener("click", (e) => {
-        stop(e);
-        applyBG();
-    });
-
-    bgDiv.appendChild(input);
-    bgDiv.appendChild(applyBtn);
-    container.appendChild(bgDiv);
-}
-
-
+        try {
+            const videoSec = getByDataHook('videosec')
+            if (videoSec.children.length == 10) {
+                videoSec.lastChild.remove();
+                videoSec.lastChild.remove();
+                videoSec.lastChild.remove();
+            }
+        } catch {}
+        if (!getByDataHook('newinputbtn')) createInputButton();
+        canResetJoystick = true;
+    } else if (body.querySelector('.g-recaptcha-response')) {
+        //Captha
+        copyright(false);
+        showControls(false);
+        resetJoystick();
+        canResetJoystick = true;
+    } else if (body.querySelector('.game-view') && !body.querySelector('.room-view')) {
+        //In game
+        if (canResetJoystick) {
+            copyright(false);
+            showControls(true);
+            setupGameUI();
+            resetJoystick();
+            canResetJoystick = false;
+        }
     } else if (body.querySelector('.game-view') && !body.querySelector('.room-link-view')) {
         //Room admin
         copyright(false);
@@ -253,36 +236,6 @@ function createInputButton() {
     });
     el.parentNode.replaceChild(elClone, el);
 }
-
-function createBackgroundButton() {
-    if (getByDataHook('bg-input')) return;
-
-    let container = body.querySelector('.settings-view .section.selected');
-    if (!container) return;
-
-    // Creamos un contenedor para que no se vea feo
-    let bgDiv = document.createElement("div");
-    bgDiv.style.width = "100%";
-    bgDiv.style.marginTop = "15px";
-    bgDiv.innerHTML = '<label style="display:block; font-size:10px;">URL DEL FONDO:</label>';
-
-    let input = document.createElement("input");
-    input.setAttribute("data-hook", "bg-input");
-    input.type = "text";
-    input.placeholder = "Pega el link aquí...";
-    input.value = localStorage.getItem('custom_bg') || "";
-    input.style.width = "100%";
-    input.style.color = "black";
-
-    // Cuando el usuario deja de escribir, se cambia el fondo
-    input.addEventListener("change", function() {
-        setGameBackground(input.value);
-    });
-
-    bgDiv.appendChild(input);
-    container.appendChild(bgDiv);
-}
-
 
 function createShareButton() {
     let share = document.createElement("button");
