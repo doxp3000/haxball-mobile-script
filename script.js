@@ -180,36 +180,20 @@ function updateUI() {
         copyright(true);
         showControls(false);
     } else if (body.querySelector('.settings-view')) {
-        //Settings
-        copyright(false);
-        if (inputOptionsHandler.getAttribute("hidden") != null) {
-            showControls(false);
+    // Estamos en la pestaña de ajustes
+    copyright(false);
+
+    // Verificamos si la ventana de opciones de input está oculta
+    if (inputOptionsHandler.getAttribute("hidden") != null) {
+        showControls(false); // Oculta el joystick mientras configuras
+        
+        // Si el botón de configurar controles NO existe, lo creamos
+        if (!getByDataHook('newinputbtn')) {
+            createInputButton();
         }
-        try {
-            const videoSec = getByDataHook('videosec')
-            if (videoSec.children.length == 10) {
-                videoSec.lastChild.remove();
-                videoSec.lastChild.remove();
-                videoSec.lastChild.remove();
-            }
-        } catch {}
-        if (!getByDataHook('newinputbtn')) createInputButton();
-        canResetJoystick = true;
-    } else if (body.querySelector('.g-recaptcha-response')) {
-        //Captha
-        copyright(false);
-        showControls(false);
-        resetJoystick();
-        canResetJoystick = true;
-    } else if (body.querySelector('.game-view') && !body.querySelector('.room-view')) {
-        //In game
-        if (canResetJoystick) {
-            copyright(false);
-            showControls(true);
-            setupGameUI();
-            resetJoystick();
-            canResetJoystick = false;
-        }
+    }
+    canResetJoystick = true;
+}
     } else if (body.querySelector('.game-view') && !body.querySelector('.room-link-view')) {
         //Room admin
         copyright(false);
