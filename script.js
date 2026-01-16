@@ -1,5 +1,5 @@
 document.head.appendChild(Object.assign(document.createElement("style"), { innerHTML: "#thumb,body{touch-action:none}body{user-select:none;height:100%}@media only screen and (max-device-width:480px){body{touch-action:manipulation}}.header,.rightbar{display:none!important}.rounded{border:none;border-radius:50%}[view|=hidden]{display:none}[view|=visible]{display:flex;justify-content:center;align-items:center}[float]{position:absolute}svg{fill:#ecf0f3cc;width:30px;height:auto}#kick svg{width:50%}" }));
-document.querySelector('.gameframe').contentWindow.document.head.appendChild(Object.assign(document.createElement("style"), { innerHTML: ".room-view,.roomlist-view{height:100%;margin-top:0}.game-view>.top-section,.room-view{margin-top:0}.settings-view{width:100%;max-height:none}.game-view>[data-hook=popups]{background-color:#40404085}.disconnected-view .dialog,.disconnected-view .room-view>.container{width:450px}.create-room-view>.dialog,.room-view.create-room-view>.container{max-width:450px;width:100%}body{background:#404040}[data-hook=leave-btn]{background:#c13535!important}.file-btn,[data-hook=rec-btn]{display:none!important}h1{text-align:center}.room-view>.container>.header-btns{bottom:0;right:10px;top:auto}.room-view>.container{max-width:none;max-height:max-content}.room-view{position:absolute;width:100%}.roomlist-view>.dialog{max-width:max-content;max-height:max-content}.game-state-view .bar>.scoreboard{display:flex;align-items:center;margin-right:50px}.chatbox-view{position:absolute;left:10px;margin:0;top:5px;width:10%;pointer-events:none;font-size:0.5rem;display:contents}.chatbox-view-contents{flex-direction:column-reverse;background:0 0;pointer-events:none}.chatbox-view-contents>.input{margin-bottom:10px;pointer-events:auto}.chatbox-view-contents>.log{flex-direction:column;pointer-events:none;overflow-y:scroll;scrollbar-width:none}.settings-view .section.selected{display:flex;align-items:center}.log-contents{display:flex;flex-direction:column-reverse;text-shadow:1px 1px 5px #000000cc}.fade-out{opacity:0;transition:opacity 10s ease-out}thead tr{display:table-row!important}svg{width: 1em}.input-options{position: absolute;width: 100%;height: 100%;z-index: 20;background-color: #404040;}" }));
+document.querySelector('.gameframe').contentWindow.document.head.appendChild(Object.assign(document.createElement("style"), { innerHTML: ".room-view,.roomlist-view{height:100%;margin-top:0}.game-view>.top-section,.room-view{margin-top:0}.settings-view{width:100%;max-height:none}.game-view>[data-hook=popups]{background-color:#1a212585}.disconnected-view .dialog,.disconnected-view .room-view>.container{width:450px}.create-room-view>.dialog,.room-view.create-room-view>.container{max-width:450px;width:100%}body{background:#1a2125}[data-hook=leave-btn]{background:#c13535!important}.file-btn,[data-hook=rec-btn]{display:none!important}h1{text-align:center}.room-view>.container>.header-btns{bottom:0;right:10px;top:auto}.room-view>.container{max-width:none;max-height:max-content}.room-view{position:absolute;width:100%}.roomlist-view>.dialog{max-width:max-content;max-height:max-content}.game-state-view .bar>.scoreboard{display:flex;align-items:center;margin-right:50px}.chatbox-view{position:absolute;left:10px;margin:0;top:5px;width:10%;pointer-events:none;font-size:0.5rem;display:contents}.chatbox-view-contents{flex-direction:column-reverse;background:0 0;pointer-events:none}.chatbox-view-contents>.input{margin-bottom:10px;pointer-events:auto}.chatbox-view-contents>.log{flex-direction:column;pointer-events:none;overflow-y:scroll;scrollbar-width:none}.settings-view .section.selected{display:flex;align-items:center}.log-contents{display:flex;flex-direction:column-reverse;text-shadow:1px 1px 5px #000000cc}.fade-out{opacity:0;transition:opacity 10s ease-out}thead tr{display:table-row!important}svg{width: 1em}.input-options{position: absolute;width: 100%;height: 100%;z-index: 20;background-color: #1a2125;}" }));
 
 if(!localStorage.getItem('low_latency_canvas') || localStorage.getItem('low_latency_canvas') == 1){
     localStorage.setItem('low_latency_canvas',0)
@@ -11,7 +11,7 @@ let gameFrame = document.querySelector('.gameframe').contentWindow;
 let body;
 
 const tips = [
-    "Haxball Mobile Mod V1.1",
+    "Haxball Mobile Mod V1",
     
 ];
 
@@ -605,45 +605,20 @@ function setupControls() {
     document.head.appendChild(controlsHandler);
 
     inputOptionsHandler.setAttribute("class", "input-options");
-    inputOptionsHandler.setAttribute("hidden", "");
-    
-    // PASO 1: HTML con el botón de Turbo incluido
-    inputOptionsHandler.innerHTML = '<div class="dialog settings-view" style="height:min-content"><h1>Controls</h1><button data-hook="closeinput" style="position:absolute;top:12px;right:10px">Back</button><div class="tabcontents"><div class="section selected"><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Size</div><div style="width:45px">0</div><input class="slider" type="range" min="10" max="30" step="0.01"></div><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Margin</div><div style="width:45px">0</div><input class="slider" type="range" min="0" max="15" step="0.01"></div><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Opacity</div><div style="width:45px">0</div><input class="slider" type="range" min="0.2" max="1" step="0.01"></div><br><div class="option-row"><div style="flex:1">Turbo Kick</div><button data-hook="toggle-turbo" style="width:80px; padding:5px; border-radius:4px; border:none; color:white;">OFF</button></div><br><button data-hook="resetinput">Reset</button></div></div></div>';
-    
+    inputOptionsHandler.setAttribute("hidden", "")
+    inputOptionsHandler.innerHTML = '<div class="dialog settings-view" style="height:min-content"><h1>Controls</h1><button data-hook="closeinput" style="position:absolute;top:12px;right:10px">Back</button><div class="tabcontents"><div class="section selected"><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Size</div><div style="width:45px">0</div><input class="slider" type="range" min="10" max="30" step="0.01"></div><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Margin</div><div style="width:45px">0</div><input class="slider" type="range" min="0" max="15" step="0.01"></div><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Opacity</div><div style="width:45px">0</div><input class="slider" type="range" min="0.2" max="1" step="0.01"></div><br><button data-hook="resetinput">Reset</button></div></div></div>';
     body.parentNode.appendChild(inputOptionsHandler);
-    
-    // Listeners básicos
     body.parentNode.querySelector('[data-hook="closeinput"]').addEventListener("click", function() {
         inputOptionsHandler.setAttribute("hidden", "");
         showControls(false);
     });
-    
     body.parentNode.querySelector('[data-hook="resetinput"]').addEventListener("click", function() {
-        updateControlsOptions(20, 5, 1, true);
+        updateControlsOptions(20, 5, 1, true)
     });
+    inputOptionsHandler.querySelectorAll(".option-row")[0].children[2].addEventListener("input", onControlsSettingsInput)
+    inputOptionsHandler.querySelectorAll(".option-row")[1].children[2].addEventListener("input", onControlsSettingsInput)
+    inputOptionsHandler.querySelectorAll(".option-row")[2].children[2].addEventListener("input", onControlsSettingsInput)
 
-    inputOptionsHandler.querySelectorAll(".option-row")[0].children[2].addEventListener("input", onControlsSettingsInput);
-    inputOptionsHandler.querySelectorAll(".option-row")[1].children[2].addEventListener("input", onControlsSettingsInput);
-    inputOptionsHandler.querySelectorAll(".option-row")[2].children[2].addEventListener("input", onControlsSettingsInput);
-
-    // PASO 2: Lógica del botón ON/OFF (Definida globalmente para que kickButton la vea)
-    window.turboEnabled = localStorage.getItem('turbo_enabled') === 'true';
-    const turboBtn = inputOptionsHandler.querySelector('[data-hook="toggle-turbo"]');
-
-    function updateTurboBtnStyle() {
-        turboBtn.innerHTML = window.turboEnabled ? "ON" : "OFF";
-        turboBtn.style.backgroundColor = window.turboEnabled ? "#43b581" : "#c13535";
-    }
-    updateTurboBtnStyle();
-
-    turboBtn.addEventListener("click", function(e) {
-        e.stopPropagation();
-        window.turboEnabled = !window.turboEnabled;
-        localStorage.setItem('turbo_enabled', window.turboEnabled);
-        updateTurboBtnStyle();
-    });
-
-    // Crear Joystick
     joystick = document.createElement("div");
     joystick.setAttribute("class", "neo rounded sizer");
     joystick.setAttribute("view", "hidden");
@@ -654,57 +629,49 @@ function setupControls() {
     joystick.addEventListener('touchmove', handleTouchMove);
     joystick.addEventListener('touchend', handleTouchEnd);
 
-    // Crear Botón Patear
     kickButton = document.createElement("button");
     kickButton.setAttribute("class", "neo rounded sizer");
     kickButton.setAttribute("view", "hidden");
     kickButton.setAttribute("float", "");
     kickButton.setAttribute("id", "kick");
     kickButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M290 49c-16 0-32 14-38 36-6 25 5 48 22 52 18 5 39-10 45-35 7-25-5-48-22-52l-7-1zM89 68 78 87c32 16 63 34 96 47l28-12c-40-16-77-34-113-54zm148 56c-48 26-98 42-154 62l9 16c52-16 111-33 161-56-7-6-12-13-16-22zm30 35c-22 11-46 20-71 29-20 45-28 95-37 140l-2 11-101-40-16 26 130 60 3-4 15-29a1672 1672 0 0 0 79-193zm-31 135-17 36c25 37 57 79 95 109l23-17c-36-40-73-85-101-128zm188 73a48 48 0 0 0-48 48 48 48 0 0 0 48 48 48 48 0 0 0 48-48 48 48 0 0 0-48-48z"/></svg>';
-
-    let turboInterval = null;
-
-    kickButton.addEventListener('touchstart', function(e) {
-        if(e.cancelable) e.preventDefault();
-        kick('keydown');
-        
-        if (window.turboEnabled && !turboInterval) {
-            turboInterval = setInterval(() => {
-                kick('keyup');
-                setTimeout(() => kick('keydown'), 5);
-            }, 45);
-        }
-    });
-
-    kickButton.addEventListener('touchend', function(e) {
-        if(e.cancelable) e.preventDefault();
-        if (turboInterval) {
-            clearInterval(turboInterval);
-            turboInterval = null;
-        }
-        kick('keyup');
-    });
-
-    kickButton.addEventListener('touchcancel', function() {
-        if (turboInterval) {
-            clearInterval(turboInterval);
-            turboInterval = null;
-        }
-        kick('keyup');
-    });
+    kickButton.addEventListener('touchstart', function() { kick('keydown') });
+    kickButton.addEventListener('touchend', function() { kick('keyup') });
 
     document.body.appendChild(joystick);
     document.body.appendChild(kickButton);
 
     const controlOptions = JSON.parse(localStorage.getItem("controls"));
     if (controlOptions === null) {
-        updateControlsOptions(20, 5, 1, true);
+        updateControlsOptions(20, 5, 1, true)
     } else {
-        updateControlsOptions(controlOptions[0], controlOptions[1], controlOptions[2], true);
+        updateControlsOptions(controlOptions[0], controlOptions[1], controlOptions[2], true)
     }
+
     resetJoystick();
 }
 
+
+
+
+
+
+
+
+
+
+let previousDigitalStickState = "";
+let previousAnalogStickState = "";
+let isXButtonPressed = false;
+
+window.addEventListener("gamepadconnected", (event) => {
+  console.log("Gamepad connected:", event.gamepad);
+  checkGamepadState(event.gamepad);
+});
+
+window.addEventListener("gamepaddisconnected", (event) => {
+  console.log("Gamepad disconnected:", event.gamepad);
+});
 
 function checkGamepadState(gamepad) {
   requestAnimationFrame(() => {
