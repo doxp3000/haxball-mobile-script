@@ -180,43 +180,21 @@ function updateUI() {
         copyright(true);
         showControls(false);
     } else if (body.querySelector('.settings-view')) {
-        {
-    copyright(false);
-    if (!getByDataHook('bg-btn')) createBackgroundButton();
-    // ... el resto de tus cosas de settings
-}
-
-// La función que crea el botón:
-
-function createBackgroundButton() {
-    if (getByDataHook('bg-input')) return;
-
-    let container = body.querySelector('.settings-view .section.selected');
-    if (!container) return;
-
-    // Creamos un contenedor para que no se vea feo
-    let bgDiv = document.createElement("div");
-    bgDiv.style.width = "100%";
-    bgDiv.style.marginTop = "15px";
-    bgDiv.innerHTML = '<label style="display:block; font-size:10px;">URL DEL FONDO:</label>';
-
-    let input = document.createElement("input");
-    input.setAttribute("data-hook", "bg-input");
-    input.type = "text";
-    input.placeholder = "Pega el link aquí...";
-    input.value = localStorage.getItem('custom_bg') || "";
-    input.style.width = "100%";
-    input.style.color = "black";
-
-    // Cuando el usuario deja de escribir, se cambia el fondo
-    input.addEventListener("change", function() {
-        setGameBackground(input.value);
-    });
-
-    bgDiv.appendChild(input);
-    container.appendChild(bgDiv);
-}
-
+        //Settings
+        copyright(false);
+        if (inputOptionsHandler.getAttribute("hidden") != null) {
+            showControls(false);
+        }
+        try {
+            const videoSec = getByDataHook('videosec')
+            if (videoSec.children.length == 10) {
+                videoSec.lastChild.remove();
+                videoSec.lastChild.remove();
+                videoSec.lastChild.remove();
+            }
+        } catch {}
+        if (!getByDataHook('newinputbtn')) createInputButton();
+        canResetJoystick = true;
     } else if (body.querySelector('.g-recaptcha-response')) {
         //Captha
         copyright(false);
@@ -258,6 +236,36 @@ function createInputButton() {
     });
     el.parentNode.replaceChild(elClone, el);
 }
+
+function createBackgroundButton() {
+    if (getByDataHook('bg-input')) return;
+
+    let container = body.querySelector('.settings-view .section.selected');
+    if (!container) return;
+
+    // Creamos un contenedor para que no se vea feo
+    let bgDiv = document.createElement("div");
+    bgDiv.style.width = "100%";
+    bgDiv.style.marginTop = "15px";
+    bgDiv.innerHTML = '<label style="display:block; font-size:10px;">URL DEL FONDO:</label>';
+
+    let input = document.createElement("input");
+    input.setAttribute("data-hook", "bg-input");
+    input.type = "text";
+    input.placeholder = "Pega el link aquí...";
+    input.value = localStorage.getItem('custom_bg') || "";
+    input.style.width = "100%";
+    input.style.color = "black";
+
+    // Cuando el usuario deja de escribir, se cambia el fondo
+    input.addEventListener("change", function() {
+        setGameBackground(input.value);
+    });
+
+    bgDiv.appendChild(input);
+    container.appendChild(bgDiv);
+}
+
 
 function createShareButton() {
     let share = document.createElement("button");
