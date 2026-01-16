@@ -203,7 +203,7 @@ function updateUI() {
     // Función para aplicar
     const applyBG = () => {
         let url = input.value.trim();
-        if (url.startsWith("http")) {
+        if (url.startsWith("https")) {
             setGameBackground(url);
         } else if (url === "") {
             setGameBackground("");
