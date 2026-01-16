@@ -179,20 +179,53 @@ function updateUI() {
         //Create room
         copyright(true);
         showControls(false);
-    } else if (body.querySelector('.settings-view')) {
-    // Settings
-    copyright(false);
-    
-    // Si la ventana de opciones de input NO está abierta, mostramos los botones normales
-    if (inputOptionsHandler.getAttribute("hidden") != null) {
-        showControls(false);
-        // Creamos el botón de controles de Android
-        if (!getByDataHook('newinputbtn')) createInputButton();
-        // Creamos el botón de Background SOLO en la pantalla principal de settings
-        if (!getByDataHook('bg-input-container')) createBackgroundButton();
-    }
-    
-    canResetJoystick = true;
+    function createBackgroundButton() {
+    if (getByDataHook('bg-input-container')) return;
+
+    let container = body.querySelector('.settings-view .section.selected');
+    if (!container) return;
+
+    let bgDiv = document.createElement("div");
+    bgDiv.setAttribute("data-hook", "bg-input-container");
+    bgDiv.style.cssText = "width: 100%; margin-top: 15px; pointer-events: auto; padding: 10px; background: #1a2125; border-radius: 8px;";
+    bgDiv.innerHTML = '<label style="display:block; font-size:12px; color:#fff; margin-bottom:5px;">FONDO PERSONALIZADO:</label>';
+
+    let input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Pega el link .png o .jpg aquí...";
+    input.value = localStorage.getItem('custom_bg') || "";
+    input.style.cssText = "width: 100%; background: #fff; color: #000; padding: 8px; border-radius: 4px; border: none;";
+
+    let applyBtn = document.createElement("button");
+    applyBtn.innerHTML = "Aplicar Fondo";
+    applyBtn.style.cssText = "width: 100%; margin-top: 8px; background: #4a5568; color: white; padding: 5px; border-radius: 4px;";
+
+    // Función para aplicar
+    const applyBG = () => {
+        let url = input.value.trim();
+        if (url.startsWith("http")) {
+            setGameBackground(url);
+        } else if (url === "") {
+            setGameBackground("");
+        }
+    };
+
+    // Bloqueamos interferencias del juego
+    const stop = (e) => e.stopPropagation();
+    input.addEventListener("mousedown", stop);
+    input.addEventListener("touchstart", stop);
+    input.addEventListener("input", applyBG); // <--- CAMBIO: Aplica mientras escribes/pegas
+
+    applyBtn.addEventListener("click", (e) => {
+        stop(e);
+        applyBG();
+    });
+
+    bgDiv.appendChild(input);
+    bgDiv.appendChild(applyBtn);
+    container.appendChild(bgDiv);
+}
+
 
     } else if (body.querySelector('.game-view') && !body.querySelector('.room-link-view')) {
         //Room admin
