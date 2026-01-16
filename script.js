@@ -814,3 +814,104 @@ function getDirection(x, y) {
   const directions = ["d", "sd", "s", "sa", "a", "aw", "w", "wd"];
   return directions[sector];
 }
+// --- AUTO-TURBO SCRIPT ---
+(function() {
+    // 1. Configuraciones
+    const TURBO_SPEED = 50; // Velocidad en ms (más bajo = más rápido)
+    
+    // Función que simula la tecla X de forma MODERNA
+    function triggerKey(type) {
+        const event = new KeyboardEvent(type, {
+            bubbles: true, 
+            cancelable: true, 
+            view: window,
+            keyCode: 88,      // Para navegadores viejos
+            code: "KeyX",     // IMPORTANTE: Para Haxball moderno
+            key: "x"
+        });
+        document.body.dispatchEvent(event); // Enviamos al body directamente
+    }
+
+    // 2. Crear el Botón
+    function createProTurboBtn() {
+        // Si ya existe, no hacemos nada
+        if (document.getElementById("haxball-turbo-btn")) return;
+
+        let btn = document.createElement("div");
+        btn.id = "haxball-turbo-btn";
+        btn.innerHTML = "⚡"; // Icono de rayo
+        
+        // Estilo: Botón amarillo flotante a la derecha
+        btn.style.cssText = `
+            position: fixed;
+            bottom: 120px; 
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 215, 0, 0.7); 
+            border: 3px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            z-index: 999999;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        `;
+
+        // 3. Lógica del Turbo
+        let interval = null;
+
+        const startAction = (e) => {
+            e.preventDefault(); 
+            e.stopPropagation();
+            
+            if (interval) return;
+            
+            btn.style.background = "rgba(255, 69, 0, 0.9)"; // Cambia a rojo al tocar
+            btn.style.transform = "scale(0.95)";
+
+            // Disparo inicial
+            triggerKey('keydown');
+
+            interval = setInterval(() => {
+                triggerKey('keyup');
+                setTimeout(() => triggerKey('keydown'), 10); // Pequeña pausa necesaria
+            }, TURBO_SPEED);
+        };
+
+        const stopAction = (e) => {
+            if (e) e.preventDefault();
+            
+            if (interval) {
+                clearInterval(interval);
+                interval = null;
+                triggerKey('keyup'); // Asegurar que soltamos la tecla
+            }
+            btn.style.background = "rgba(255, 215, 0, 0.7)"; // Vuelve a amarillo
+            btn.style.transform = "scale(1)";
+        };
+
+        // Eventos para Móvil y PC
+        btn.addEventListener("touchstart", startAction, { passive: false });
+        btn.addEventListener("touchend", stopAction);
+        btn.addEventListener("touchcancel", stopAction);
+        btn.addEventListener("mousedown", startAction);
+        btn.addEventListener("mouseup", stopAction);
+        btn.addEventListener("mouseleave", stopAction);
+
+        document.body.appendChild(btn);
+    }
+
+    // 4. Inyección Segura (Intenta poner el botón cada segundo hasta que lo logra)
+    setInterval(() => {
+        // Solo creamos el botón si estamos en la vista de juego (si existe el canvas)
+        if (document.querySelector("canvas")) {
+            createProTurboBtn();
+        }
+    }, 1000);
+
+})();
