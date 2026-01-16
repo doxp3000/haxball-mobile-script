@@ -605,37 +605,45 @@ function setupControls() {
     document.head.appendChild(controlsHandler);
 
     inputOptionsHandler.setAttribute("class", "input-options");
-    inputOptionsHandler.setAttribute("hidden", "")
-    inputOptionsHandler.innerHTML = '<div class="dialog settings-view" style="height:min-content"><h1>Controls</h1><button data-hook="closeinput" style="position:absolute;top:12px;right:10px">Back</button><div class="tabcontents"><div class="section selected"><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Size</div><div style="width:45px">0</div><input class="slider" type="range" min="10" max="30" step="0.01"></div><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Margin</div><div style="width:45px">0</div><input class="slider" type="range" min="0" max="15" step="0.01"></div><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Opacity</div><div style="width:45px">0</div><input class="slider" type="range" min="0.2" max="1" step="0.01"></div><br><button data-hook="resetinput">Reset</button></div></div></div>';
+    inputOptionsHandler.setAttribute("hidden", "");
+    
+    // PASO 1: HTML con el botón de Turbo incluido
+    inputOptionsHandler.innerHTML = '<div class="dialog settings-view" style="height:min-content"><h1>Controls</h1><button data-hook="closeinput" style="position:absolute;top:12px;right:10px">Back</button><div class="tabcontents"><div class="section selected"><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Size</div><div style="width:45px">0</div><input class="slider" type="range" min="10" max="30" step="0.01"></div><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Margin</div><div style="width:45px">0</div><input class="slider" type="range" min="0" max="15" step="0.01"></div><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Opacity</div><div style="width:45px">0</div><input class="slider" type="range" min="0.2" max="1" step="0.01"></div><br><div class="option-row"><div style="flex:1">Turbo Kick</div><button data-hook="toggle-turbo" style="width:80px; padding:5px; border-radius:4px; border:none; color:white;">OFF</button></div><br><button data-hook="resetinput">Reset</button></div></div></div>';
+    
     body.parentNode.appendChild(inputOptionsHandler);
+    
+    // Listeners básicos
     body.parentNode.querySelector('[data-hook="closeinput"]').addEventListener("click", function() {
         inputOptionsHandler.setAttribute("hidden", "");
         showControls(false);
     });
-    body.parentNode.querySelector('[data-hook="resetinput"]').addEventListener("click", function() {
-        updateControlsOptions(20, 5, 1, true)
-    });
-    inputOptionsHandler.querySelectorAll(".option-row")[0].children[2].addEventListener("input", onControlsSettingsInput)
-    inputOptionsHandler.querySelectorAll(".option-row")[1].children[2].addEventListener("input", onControlsSettingsInput)
-    inputOptionsHandler.querySelectorAll(".option-row")[2].children[2].addEventListener("input", onControlsSettingsInput)
     
-    // Lógica para activar/desactivar
-let turboEnabled = localStorage.getItem('turbo_enabled') === 'true';
-const turboBtn = inputOptionsHandler.querySelector('[data-hook="toggle-turbo"]');
+    body.parentNode.querySelector('[data-hook="resetinput"]').addEventListener("click", function() {
+        updateControlsOptions(20, 5, 1, true);
+    });
 
-function updateTurboBtnStyle() {
-    turboBtn.innerHTML = turboEnabled ? "ON" : "OFF";
-    turboBtn.style.backgroundColor = turboEnabled ? "#43b581" : "#c13535"; // Verde para ON, Rojo para OFF
-}
-updateTurboBtnStyle();
+    inputOptionsHandler.querySelectorAll(".option-row")[0].children[2].addEventListener("input", onControlsSettingsInput);
+    inputOptionsHandler.querySelectorAll(".option-row")[1].children[2].addEventListener("input", onControlsSettingsInput);
+    inputOptionsHandler.querySelectorAll(".option-row")[2].children[2].addEventListener("input", onControlsSettingsInput);
 
-turboBtn.addEventListener("click", function() {
-    turboEnabled = !turboEnabled;
-    localStorage.setItem('turbo_enabled', turboEnabled);
+    // PASO 2: Lógica del botón ON/OFF (Definida globalmente para que kickButton la vea)
+    window.turboEnabled = localStorage.getItem('turbo_enabled') === 'true';
+    const turboBtn = inputOptionsHandler.querySelector('[data-hook="toggle-turbo"]');
+
+    function updateTurboBtnStyle() {
+        turboBtn.innerHTML = window.turboEnabled ? "ON" : "OFF";
+        turboBtn.style.backgroundColor = window.turboEnabled ? "#43b581" : "#c13535";
+    }
     updateTurboBtnStyle();
-});
 
+    turboBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        window.turboEnabled = !window.turboEnabled;
+        localStorage.setItem('turbo_enabled', window.turboEnabled);
+        updateTurboBtnStyle();
+    });
 
+    // Crear Joystick
     joystick = document.createElement("div");
     joystick.setAttribute("class", "neo rounded sizer");
     joystick.setAttribute("view", "hidden");
@@ -646,7 +654,7 @@ turboBtn.addEventListener("click", function() {
     joystick.addEventListener('touchmove', handleTouchMove);
     joystick.addEventListener('touchend', handleTouchEnd);
 
-    // --- AQUÍ EMPIEZA EL BOTÓN DE PATEAR CON TURBO ---
+    // Crear Botón Patear
     kickButton = document.createElement("button");
     kickButton.setAttribute("class", "neo rounded sizer");
     kickButton.setAttribute("view", "hidden");
@@ -656,13 +664,11 @@ turboBtn.addEventListener("click", function() {
 
     let turboInterval = null;
 
-    kickButton.addEventListener('touchstart', function(e) { 
+    kickButton.addEventListener('touchstart', function(e) {
         if(e.cancelable) e.preventDefault();
-        // Patear una vez al tocar
-        kick('keydown'); 
+        kick('keydown');
         
-        // Activar el Turbo cada 45ms
-        if (!turboInterval) {
+        if (window.turboEnabled && !turboInterval) {
             turboInterval = setInterval(() => {
                 kick('keyup');
                 setTimeout(() => kick('keydown'), 5);
@@ -670,13 +676,13 @@ turboBtn.addEventListener("click", function() {
         }
     });
 
-    kickButton.addEventListener('touchend', function(e) { 
+    kickButton.addEventListener('touchend', function(e) {
         if(e.cancelable) e.preventDefault();
         if (turboInterval) {
             clearInterval(turboInterval);
             turboInterval = null;
         }
-        kick('keyup'); 
+        kick('keyup');
     });
 
     kickButton.addEventListener('touchcancel', function() {
@@ -692,13 +698,13 @@ turboBtn.addEventListener("click", function() {
 
     const controlOptions = JSON.parse(localStorage.getItem("controls"));
     if (controlOptions === null) {
-        updateControlsOptions(20, 5, 1, true)
+        updateControlsOptions(20, 5, 1, true);
     } else {
-        updateControlsOptions(controlOptions[0], controlOptions[1], controlOptions[2], true)
+        updateControlsOptions(controlOptions[0], controlOptions[1], controlOptions[2], true);
     }
-
     resetJoystick();
 }
+
 
 function checkGamepadState(gamepad) {
   requestAnimationFrame(() => {
