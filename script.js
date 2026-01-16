@@ -618,6 +618,23 @@ function setupControls() {
     inputOptionsHandler.querySelectorAll(".option-row")[0].children[2].addEventListener("input", onControlsSettingsInput)
     inputOptionsHandler.querySelectorAll(".option-row")[1].children[2].addEventListener("input", onControlsSettingsInput)
     inputOptionsHandler.querySelectorAll(".option-row")[2].children[2].addEventListener("input", onControlsSettingsInput)
+    
+    // Lógica para activar/desactivar
+let turboEnabled = localStorage.getItem('turbo_enabled') === 'true';
+const turboBtn = inputOptionsHandler.querySelector('[data-hook="toggle-turbo"]');
+
+function updateTurboBtnStyle() {
+    turboBtn.innerHTML = turboEnabled ? "ON" : "OFF";
+    turboBtn.style.backgroundColor = turboEnabled ? "#43b581" : "#c13535"; // Verde para ON, Rojo para OFF
+}
+updateTurboBtnStyle();
+
+turboBtn.addEventListener("click", function() {
+    turboEnabled = !turboEnabled;
+    localStorage.setItem('turbo_enabled', turboEnabled);
+    updateTurboBtnStyle();
+});
+
 
     joystick = document.createElement("div");
     joystick.setAttribute("class", "neo rounded sizer");
