@@ -187,21 +187,36 @@ function updateUI() {
 }
 
 // La función que crea el botón:
+
 function createBackgroundButton() {
+    if (getByDataHook('bg-input')) return;
+
     let container = body.querySelector('.settings-view .section.selected');
     if (!container) return;
 
-    let btn = document.createElement("button");
-    btn.setAttribute("data-hook", "bg-btn");
-    btn.innerHTML = '🖼️ Cambiar Fondo';
+    // Creamos un contenedor para que no se vea feo
+    let bgDiv = document.createElement("div");
+    bgDiv.style.width = "100%";
+    bgDiv.style.marginTop = "15px";
+    bgDiv.innerHTML = '<label style="display:block; font-size:10px;">URL DEL FONDO:</label>';
 
-    btn.addEventListener("click", function() {
-        let url = prompt("Pega el link de la imagen de Google o Pinterest:", localStorage.getItem('custom_bg') || "");
-        if (url !== null) setGameBackground(url);
+    let input = document.createElement("input");
+    input.setAttribute("data-hook", "bg-input");
+    input.type = "text";
+    input.placeholder = "Pega el link aquí...";
+    input.value = localStorage.getItem('custom_bg') || "";
+    input.style.width = "100%";
+    input.style.color = "black";
+
+    // Cuando el usuario deja de escribir, se cambia el fondo
+    input.addEventListener("change", function() {
+        setGameBackground(input.value);
     });
 
-    container.appendChild(btn);
+    bgDiv.appendChild(input);
+    container.appendChild(bgDiv);
 }
+
     } else if (body.querySelector('.g-recaptcha-response')) {
         //Captha
         copyright(false);
