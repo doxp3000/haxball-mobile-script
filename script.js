@@ -237,6 +237,75 @@ function createInputButton() {
     el.parentNode.replaceChild(elClone, el);
 }
 
+function createTurboKickButton() {
+    // 1. Evitamos que se creen dos botones iguales
+    if (document.querySelector('[data-hook="turbo-kick"]')) return;
+
+    // 2. CREACIÓN VISUAL DEL BOTÓN
+    let btn = document.createElement("button");
+    btn.setAttribute("data-hook", "turbo-kick");
+    btn.innerHTML = "X"; // O pon "SHOOT"
+    
+    // Estilos Pro: Redondo, rojo semitransparente, posicionado a la derecha
+    btn.style.cssText = `
+        position: fixed;
+        bottom: 60px;
+        right: 40px; 
+        width: 70px;
+        height: 70px;
+        background-color: rgba(220, 20, 60, 0.6);
+        border: 4px solid rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        color: white;
+        font-weight: bold;
+        font-size: 24px;
+        z-index: 9999;
+        pointer-events: auto;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+    `;
+
+    // 3. LÓGICA DEL TURBO (Aquí está la magia)
+    let interval = null;
+    const KICK_KEY = 88; // Código de la tecla X
+
+    const startTurbo = (e) => {
+        if (e.cancelable) e.preventDefault(); // Evita que la pantalla se mueva
+        if (interval) return; // Si ya corre, no lo iniciamos de nuevo
+
+        // Dispara la primera patada instantánea
+        window.dispatchEvent(new KeyboardEvent('keydown', { keyCode: KICK_KEY }));
+
+        interval = setInterval(() => {
+            // Ciclo de presionar y soltar
+            window.dispatchEvent(new KeyboardEvent('keyup', { keyCode: KICK_KEY }));
+            
+            // Pequeña pausa de 10ms antes de volver a presionar
+            setTimeout(() => {
+                window.dispatchEvent(new KeyboardEvent('keydown', { keyCode: KICK_KEY }));
+            }, 10);
+        }, 50); // Velocidad: cada 50ms
+    };
+
+    const stopTurbo = (e) => {
+        if (interval) {
+            clearInterval(interval);
+            interval = null;
+            // Soltamos la tecla final
+            window.dispatchEvent(new KeyboardEvent('keyup', { keyCode: KICK_KEY }));
+        }
+    };
+
+    // 4. CONECTAR LOS DEDOS
+    btn.addEventListener("touchstart", startTurbo, { passive: false });
+    btn.addEventListener("touchend", stopTurbo);
+    btn.addEventListener("touchcancel", stopTurbo); // Por si el dedo se sale del botón
+
+    // 5. METERLO AL JUEGO
+    document.body.appendChild(btn);
+}
+
 function createShareButton() {
     let share = document.createElement("button");
     share.setAttribute("data-hook", "share");
