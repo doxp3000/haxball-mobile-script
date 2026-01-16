@@ -180,21 +180,28 @@ function updateUI() {
         copyright(true);
         showControls(false);
     } else if (body.querySelector('.settings-view')) {
-        //Settings
-        copyright(false);
-        if (inputOptionsHandler.getAttribute("hidden") != null) {
-            showControls(false);
-        }
-        try {
-            const videoSec = getByDataHook('videosec')
-            if (videoSec.children.length == 10) {
-                videoSec.lastChild.remove();
-                videoSec.lastChild.remove();
-                videoSec.lastChild.remove();
-            }
-        } catch {}
-        if (!getByDataHook('newinputbtn')) createInputButton();
-        canResetJoystick = true;
+        {
+    copyright(false);
+    if (!getByDataHook('bg-btn')) createBackgroundButton();
+    // ... el resto de tus cosas de settings
+}
+
+// La función que crea el botón:
+function createBackgroundButton() {
+    let container = body.querySelector('.settings-view .section.selected');
+    if (!container) return;
+
+    let btn = document.createElement("button");
+    btn.setAttribute("data-hook", "bg-btn");
+    btn.innerHTML = '🖼️ Cambiar Fondo';
+
+    btn.addEventListener("click", function() {
+        let url = prompt("Pega el link de la imagen de Google o Pinterest:", localStorage.getItem('custom_bg') || "");
+        if (url !== null) setGameBackground(url);
+    });
+
+    container.appendChild(btn);
+}
     } else if (body.querySelector('.g-recaptcha-response')) {
         //Captha
         copyright(false);
