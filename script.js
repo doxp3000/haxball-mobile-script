@@ -1,8 +1,8 @@
 document.head.appendChild(Object.assign(document.createElement("style"), { innerHTML: "#thumb,body{touch-action:none}body{user-select:none;height:100%}@media only screen and (max-device-width:480px){body{touch-action:manipulation}}.header,.rightbar{display:none!important}.rounded{border:none;border-radius:50%}[view|=hidden]{display:none}[view|=visible]{display:flex;justify-content:center;align-items:center}[float]{position:absolute}svg{fill:#ecf0f3cc;width:30px;height:auto}#kick svg{width:50%}" }));
-document.querySelector('.gameframe').contentWindow.document.head.appendChild(Object.assign(document.createElement("style"), { innerHTML: ".room-view,.roomlist-view{height:100%;margin-top:0}.game-view>.top-section,.room-view{margin-top:0}.settings-view{width:100%;max-height:none}.game-view>[data-hook=popups]{background-color:#1a212585}.disconnected-view .dialog,.disconnected-view .room-view>.container{width:450px}.create-room-view>.dialog,.room-view.create-room-view>.container{max-width:450px;width:100%}body{background:#1a2125}[data-hook=leave-btn]{background:#c13535!important}.file-btn,[data-hook=rec-btn]{display:none!important}h1{text-align:center}.room-view>.container>.header-btns{bottom:0;right:10px;top:auto}.room-view>.container{max-width:none;max-height:max-content}.room-view{position:absolute;width:100%}.roomlist-view>.dialog{max-width:max-content;max-height:max-content}.game-state-view .bar>.scoreboard{display:flex;align-items:center;margin-right:50px}.chatbox-view{position:absolute;left:10px;margin:0;top:5px;width:10%;pointer-events:none;font-size:0.5rem;display:contents}.chatbox-view-contents{flex-direction:column-reverse;background:0 0;pointer-events:none}.chatbox-view-contents>.input{margin-bottom:10px;pointer-events:auto}.chatbox-view-contents>.log{flex-direction:column;pointer-events:none;overflow-y:scroll;scrollbar-width:none}.settings-view .section.selected{display:flex;align-items:center}.log-contents{display:flex;flex-direction:column-reverse;text-shadow:1px 1px 5px #000000cc}.fade-out{opacity:0;transition:opacity 10s ease-out}thead tr{display:table-row!important}svg{width: 1em}.input-options{position: absolute;width: 100%;height: 100%;z-index: 20;background-color: #1a2125;}" }));
+document.querySelector('.gameframe').contentWindow.document.head.appendChild(Object.assign(document.createElement("style"), { innerHTML: ".room-view,.roomlist-view{height:100%;margin-top:0}.game-view>.top-section,.room-view{margin-top:0}.settings-view{width:100%;max-height:none}.game-view>[data-hook=popups]{background-color:#1a212585}.disconnected-view .dialog,.disconnected-view .room-view>.container{width:450px}.create-room-view>.dialog,.room-view.create-room-view>.container{max-width:450px;width:100%}body{background:#111417}[data-hook=leave-btn]{background:#c13535!important}.file-btn,[data-hook=rec-btn]{display:none!important}h1{text-align:center}.room-view>.container>.header-btns{bottom:0;right:10px;top:auto}.room-view>.container{max-width:none;max-height:max-content}.room-view{position:absolute;width:100%}.roomlist-view>.dialog{max-width:max-content;max-height:max-content;background:#111417;border:1px solid #2a2f35}.game-state-view .bar>.scoreboard{display:flex;align-items:center;margin-right:50px}.chatbox-view{position:absolute;left:10px;margin:0;top:5px;width:10%;pointer-events:none;font-size:0.5rem;display:contents}.chatbox-view-contents{flex-direction:column-reverse;background:0 0;pointer-events:none}.chatbox-view-contents>.input{margin-bottom:10px;pointer-events:auto}.chatbox-view-contents>.log{flex-direction:column;pointer-events:none;overflow-y:scroll;scrollbar-width:none}.settings-view .section.selected{display:flex;align-items:center}.log-contents{display:flex;flex-direction:column-reverse;text-shadow:1px 1px 5px #000000cc}.fade-out{opacity:0;transition:opacity 10s ease-out}thead tr{display:table-row!important}svg{width:1em}.input-options{position:absolute;width:100%;height:100%;z-index:20;background-color:#111417}.roomlist-view table{width:100%;border-collapse:collapse}.roomlist-view thead tr{background:#1a1f24;color:#8a9bb0;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px}.roomlist-view tbody tr{border-bottom:1px solid #1e2329;transition:background 0.15s}.roomlist-view tbody tr:hover{background:#1a1f24}.roomlist-view .dialog h1{font-size:1.1rem;color:#fff;padding:14px 16px 0;margin:0}.roomlist-view .dialog>p{color:#8a9bb0;font-size:0.8rem;padding:2px 16px 10px;margin:0}.roomlist-view .filters{padding:6px 16px;background:#0f1215;border-bottom:1px solid #1e2329}.roomlist-view .buttons{padding:10px 16px;background:#0f1215;border-top:1px solid #1e2329;gap:6px}.roomlist-view .buttons button{background:#1e2329;border:1px solid #2a3040;color:#cdd6e0;font-size:0.78rem;padding:6px 12px;border-radius:6px}.roomlist-view .buttons button:hover{background:#2a3040}.roomlist-view [data-hook=listscroll]{background:#111417}" }));
 
 if(!localStorage.getItem('low_latency_canvas') || localStorage.getItem('low_latency_canvas') == 1){
-    localStorage.setItem('low_latency_canvas',0)
+    localStorage.setItem('low_latency_canvas',0);
     location.reload();
 }
 
@@ -10,11 +10,9 @@ if(!localStorage.getItem('low_latency_canvas') || localStorage.getItem('low_late
 let gameFrame = document.querySelector('.gameframe').contentWindow;
 let body;
 
-const tips = [
-    "Haxball Mobile Mod V1",
-];
+const tips = ["Haxball Mobile Mod V1"];
 
-const constrolsStyleBase = "#joystick,#kick{z-index:100;bottom:CONTROLS_MARGINvw}.neo{opacity:CONTROLS_OPACITY;background-color:#c2c2c255;box-shadow:6px 6px 10px 0 #a5abb133,-5px -5px 9px 0 #a5abb133;color:#dedede55;font-weight:bolder;font-size:0.1rem}.sizer{width:CONTROLS_WIDTH%;aspect-ratio: 1 / 1;}#joystick{left:CONTROLS_MARGIN%;overflow:visible}#thumb{width:40%;height:40%;background-color:#ecf0f3cc}#kick{right:CONTROLS_MARGIN%}button.neo:active{opacity:KICK_OPACITY}";
+const constrolsStyleBase = "#joystick,#kick{z-index:100;bottom:CONTROLS_MARGINvw}.neo{opacity:CONTROLS_OPACITY;background-color:#c2c2c255;box-shadow:6px 6px 10px 0 #a5abb133,-5px -5px 9px 0 #a5abb133;color:#dedede55;font-weight:bolder;font-size:0.1rem}.sizer{width:CONTROLS_WIDTH%;aspect-ratio:1/1;}#joystick{left:CONTROLS_MARGIN%;overflow:visible}#thumb{width:40%;height:40%;background-color:#ecf0f3cc}#kick{right:CONTROLS_MARGIN%}button.neo:active{opacity:KICK_OPACITY}";
 
 const countryFilterHandler = document.createElement('style');
 const hideButtons = document.createElement('style');
@@ -27,6 +25,7 @@ const copyrightHandler = document.createElement("span");
 const aboutHandler = document.createElement("div");
 const inputOptionsHandler = document.createElement("div");
 const backgroundOptionsHandler = document.createElement("div");
+const modsOptionsHandler = document.createElement("div");
 const config = { childList: true, subtree: true };
 
 ///////////////////////////////////////// VARIABLES /////////////////////////////////////////
@@ -46,21 +45,7 @@ let fpsAnimFrame = null;
 function setupFPS() {
     fpsCounter = document.createElement("div");
     fpsCounter.setAttribute("id", "fps-counter");
-    fpsCounter.style.cssText = `
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: rgba(0,0,0,0.6);
-        color: #00ff88;
-        font-size: 14px;
-        font-family: monospace;
-        font-weight: bold;
-        padding: 4px 8px;
-        border-radius: 6px;
-        z-index: 9999;
-        display: none;
-        pointer-events: none;
-    `;
+    fpsCounter.style.cssText = "position:fixed;top:10px;right:10px;background:rgba(0,0,0,0.6);color:#00ff88;font-size:14px;font-family:monospace;font-weight:bold;padding:4px 8px;border-radius:6px;z-index:9999;display:none;pointer-events:none;";
     fpsCounter.innerHTML = "FPS: --";
     document.body.appendChild(fpsCounter);
 }
@@ -96,22 +81,6 @@ function toggleFPS(active) {
     }
 }
 
-function createFPSButton() {
-    if (getByDataHook('fpsbtn')) return;
-    let btn = document.createElement("button");
-    btn.setAttribute("data-hook", "fpsbtn");
-    btn.innerHTML = fpsActive ? "📊 FPS: ON" : "📊 FPS: OFF";
-    btn.style.backgroundColor = fpsActive ? "#43b581" : "";
-    btn.addEventListener("click", function() {
-        const newState = !fpsActive;
-        toggleFPS(newState);
-        btn.innerHTML = newState ? "📊 FPS: ON" : "📊 FPS: OFF";
-        btn.style.backgroundColor = newState ? "#43b581" : "";
-    });
-    const inputBtn = getByDataHook('newinputbtn');
-    if (inputBtn) insertAfter(inputBtn, btn);
-}
-
 ///////////////////////////////////////// MAIN /////////////////////////////////////////
 var checkLoaderInterval = setInterval(checkLoader, 1000);
 
@@ -132,20 +101,21 @@ function init() {
     setupControls();
     setupBackground();
     setupFPS();
+    setupModsOptions();
     setupCopyright(true);
     hideButtons.remove();
 
     if (localStorage.getItem("fps_enabled") === "1") toggleFPS(true);
 
-    const observer = new MutationObserver(function(mutationsList, observer) {
+    const observer = new MutationObserver(function() {
         try { updateUI(); updatedChat(); } catch {}
     });
-    try { updateUI() } catch {}
+    try { updateUI(); } catch {}
     observer.observe(body, config);
 
     aboutHandler.setAttribute('data-hook', 'about');
-    aboutHandler.style.cssText = 'background: #1a2125; position: absolute; width: 100%; height: 100%; display: none; justify-content: center; flex-direction: column; align-items: center; margin: 0;';
-    aboutHandler.innerHTML = '<div class="dialog basic-dialog" style="max-width: 50%;"><h1>About us</h1><p>We are Vixel Dev, a small development studio that wants the Haxball community to grow, without hurting its owners. We do not monetize this application, as it is free and contains no ads. </p><p>We want to thank @basro for creating this game, and we hope not to disturb with this port. </p><p></p><p>To contact us:</p><p>E-mail: vixeldev@gmail.com</p><p>Instragram: @haxballmobile</p><div class="buttons"><button data-hook="closeabout">Close</button></div></div>';
+    aboutHandler.style.cssText = 'background:#111417;position:absolute;width:100%;height:100%;display:none;justify-content:center;flex-direction:column;align-items:center;margin:0;';
+    aboutHandler.innerHTML = '<div class="dialog basic-dialog" style="max-width:50%;"><h1>About us</h1><p>We are Vixel Dev, a small development studio that wants the Haxball community to grow, without hurting its owners.</p><p>To contact us:</p><p>E-mail: vixeldev@gmail.com</p><p>Instagram: @haxballmobile</p><div class="buttons"><button data-hook="closeabout">Close</button></div></div>';
 
     body.parentNode.appendChild(aboutHandler);
     if (localStorage.getItem("firstTime") === null) {
@@ -162,9 +132,7 @@ function init() {
 }
 
 ///////////////////////////////////////// UTILS /////////////////////////////////////////
-function insertAfter(e, n) {
-    e.parentNode.insertBefore(n, e.nextSibling);
-}
+function insertAfter(e, n) { e.parentNode.insertBefore(n, e.nextSibling); }
 
 function pickRandom(arr) {
     if (!Array.isArray(arr) || arr.length === 0) return null;
@@ -182,8 +150,7 @@ function openHaxballURL(uri) {
 
 function searchRoomlist() {
     const searchValue = getByDataHook('search').value.toLowerCase();
-    const rows = body.querySelectorAll('tr');
-    rows.forEach(row => {
+    body.querySelectorAll('tr').forEach(row => {
         const spanName = row.querySelector('span[data-hook="name"]');
         if (spanName && !spanName.textContent.toLowerCase().includes(searchValue)) {
             row.style.display = 'none';
@@ -202,7 +169,7 @@ function setupCountryFilter() {
 
 function setupCopyright() {
     copyrightHandler.setAttribute("data-hook", "copyright");
-    copyrightHandler.setAttribute("style", "text-align:center;position:absolute;bottom:15px;width:100%; display: block");
+    copyrightHandler.setAttribute("style", "text-align:center;position:absolute;bottom:15px;width:100%;display:block");
     copyrightHandler.innerHTML = 'HaxBall Mod';
     document.body.appendChild(copyrightHandler);
 }
@@ -241,8 +208,7 @@ function updateUI() {
             }
         } catch {}
         if (!getByDataHook('newinputbtn')) createInputButton();
-        if (!getByDataHook('bgbtn')) createBackgroundButton();
-        if (!getByDataHook('fpsbtn')) createFPSButton();
+        if (!getByDataHook('modsbtn')) createModsButton();
         canResetJoystick = true;
     } else if (body.querySelector('.g-recaptcha-response')) {
         copyright(false);
@@ -289,14 +255,14 @@ function createShareButton() {
     share.innerHTML = 'Share';
     insertAfter(getByDataHook('copy'), share);
     share.addEventListener("click", function() {
-        console.log("SHARE_MESSAGE🎮⚽️ Join my Haxball Mobile room by copying and pasting the following link: " + getByDataHook('link').value);
+        console.log("SHARE_MESSAGE🎮⚽️ Join my Haxball Mobile room: " + getByDataHook('link').value);
     });
 }
 
 function createStoreButton() {
     let store = document.createElement("button");
     store.setAttribute("data-hook", "store");
-    store.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 407 407" fill="white" style="height:0.85em; width: auto"><path d="M402 84 323 5c-3-3-7-5-12-5H17C8 0 0 8 0 17v373c0 9 8 17 17 17h373c9 0 17-8 17-17V96c0-4-2-9-5-12zm-101 80H67V39h234v125z"></path><path d="M214 148h43c3 0 6-2 6-6V60c0-4-3-6-6-6h-43c-3 0-6 2-6 6v82c0 4 3 6 6 6z"></path></svg> Store';
+    store.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 407 407" fill="white" style="height:0.85em;width:auto"><path d="M402 84 323 5c-3-3-7-5-12-5H17C8 0 0 8 0 17v373c0 9 8 17 17 17h373c9 0 17-8 17-17V96c0-4-2-9-5-12zm-101 80H67V39h234v125z"></path><path d="M214 148h43c3 0 6-2 6-6V60c0-4-3-6-6-6h-43c-3 0-6 2-6 6v82c0 4 3 6 6 6z"></path></svg> Store';
     insertAfter(getByDataHook('rec-btn'), store);
     store.addEventListener("click", function() { prefabMessage("/store"); });
 }
@@ -304,14 +270,13 @@ function createStoreButton() {
 function createSearchbar() {
     const inputContainer = document.createElement("div");
     inputContainer.className = "label-input";
-    inputContainer.style.backgroundColor = "transparent";
-    inputContainer.innerHTML = '<label>Search a room:</label><input data-hook="search" type="text">';
+    inputContainer.style.cssText = "background-color:transparent;padding:8px 16px;";
+    inputContainer.innerHTML = '<label style="color:#8a9bb0;font-size:0.8rem;">Search room:</label><input data-hook="search" type="text" style="background:#0f1215;border:1px solid #2a3040;color:#cdd6e0;border-radius:6px;padding:6px 10px;">';
     const dialog = body.querySelector("div.dialog");
     const secondParagraph = dialog.querySelector("p:nth-child(2)");
     insertAfter(secondParagraph, inputContainer);
     secondParagraph.innerHTML = pickRandom(tips);
-    const input = inputContainer.querySelector('input');
-    input.addEventListener("input", searchRoomlist);
+    inputContainer.querySelector('input').addEventListener("input", searchRoomlist);
 }
 
 function createURLButton() {
@@ -322,7 +287,7 @@ function createURLButton() {
         if (!body.querySelector('[data-hook="input-url"]')) {
             let urlForm = document.createElement("form");
             urlForm.action = "javascript:void(0);";
-            urlForm.innerHTML = '<div class="label-input" style="background-color: transparent"><label>URL:</label><input data-hook="input-url" type="url"></div>';
+            urlForm.innerHTML = '<div class="label-input" style="background-color:transparent"><label>URL:</label><input data-hook="input-url" type="url"></div>';
             insertAfter(body.querySelector("div.dialog > p:nth-child(2)"), urlForm);
             getByDataHook('search').parentNode.style.display = "none";
             getByDataHook('input-url').focus();
@@ -348,7 +313,7 @@ function createAboutButton() {
         const discordURL = "https://discord.gg/q27tF7CG5";
         navigator.clipboard.writeText(discordURL).then(() => {
             const originalHTML = button.innerHTML;
-            button.innerHTML = '<i class="icon-ok"></i><div>¡Copiado!</div>';
+            button.innerHTML = '<i class="icon-ok"></i><div>Copied!</div>';
             button.style.backgroundColor = "#43b581";
             setTimeout(() => {
                 button.innerHTML = originalHTML;
@@ -370,7 +335,7 @@ function filterCountries(button) {
             countryFilterHandler.innerHTML = "";
         } else {
             button.lastChild.setAttribute("class", "icon-cancel");
-            countryFilterHandler.innerHTML = "tr:not(:has(div.f-" + code + ")){display: none;}";
+            countryFilterHandler.innerHTML = "tr:not(:has(div.f-" + code + ")){display:none;}";
         }
         getByDataHook('listscroll').scrollTop = 0;
     }
@@ -391,14 +356,14 @@ function setupGameUI() {
     if (!getByDataHook('chat-toggle')) {
         const button = document.createElement("button");
         button.setAttribute("data-hook", "chat-toggle");
-        button.setAttribute("style", "display: flex; justify-content: center; align-items: center;");
+        button.setAttribute("style", "display:flex;justify-content:center;align-items:center;");
         button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20"><path fill="white" d="M5.8 12.2V6H2C.9 6 0 6.9 0 8v6c0 1.1.9 2 2 2h1v3l3-3h5c1.1 0 2-.9 2-2v-1.82a.943.943 0 0 1-.2.021h-7zM18 1H9c-1.1 0-2 .9-2 2v8h7l3 3v-3h1c1.1 0 2-.899 2-2V3c0-1.1-.9-2-2-2"/></svg>';
         button.addEventListener("click", chatToggle);
         body.querySelector('.sound-button-container').parentNode.prepend(button);
     }
     if (firstTime) {
         body.querySelector('.drag').remove();
-        body.querySelector('.stats-view-container').style.cssText = "display: none;";
+        body.querySelector('.stats-view-container').style.cssText = "display:none;";
         getByDataHook('log-contents').firstChild.remove();
         getByDataHook('menu').innerHTML = '<i class="icon-menu"></i>';
         const inputStyle = chat.querySelector('.input').style;
@@ -406,6 +371,77 @@ function setupGameUI() {
         chat.querySelector('input').addEventListener('blur', function() { inputStyle.display = 'none'; });
         firstTime = false;
     }
+}
+
+///////////////////////////////////////// MODS OPTIONS /////////////////////////////////////////
+function setupModsOptions() {
+    modsOptionsHandler.setAttribute("class", "input-options");
+    modsOptionsHandler.setAttribute("hidden", "");
+    modsOptionsHandler.style.zIndex = "25";
+    modsOptionsHandler.innerHTML = `
+        <div class="dialog settings-view" style="height:min-content;max-width:420px;margin:auto;position:relative;top:50%;transform:translateY(-50%)">
+            <h1>Mod Options</h1>
+            <button data-hook="closemods" style="position:absolute;top:12px;right:10px">Back</button>
+            <div class="tabcontents">
+                <div class="section selected" style="flex-direction:column;gap:10px;padding:12px">
+
+                    <!-- FPS -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
+                        <div>
+                            <div style="font-weight:bold;font-size:0.9rem">FPS Counter</div>
+                            <div style="color:#8a9bb0;font-size:0.75rem">Show frames per second overlay</div>
+                        </div>
+                        <button data-hook="fps-toggle-btn" style="min-width:70px;background:${localStorage.getItem('fps_enabled')==='1'?'#43b581':'#2a3040'}">${localStorage.getItem('fps_enabled')==='1'?'ON':'OFF'}</button>
+                    </div>
+
+                    <!-- Background -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
+                        <div>
+                            <div style="font-weight:bold;font-size:0.9rem">Background</div>
+                            <div style="color:#8a9bb0;font-size:0.75rem">Custom color or image</div>
+                        </div>
+                        <button data-hook="bg-open-btn" style="min-width:70px;background:#2a3040">Edit</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    `;
+
+    body.parentNode.appendChild(modsOptionsHandler);
+
+    modsOptionsHandler.querySelector('[data-hook="closemods"]').addEventListener("click", function() {
+        modsOptionsHandler.setAttribute("hidden", "");
+    });
+
+    modsOptionsHandler.querySelector('[data-hook="fps-toggle-btn"]').addEventListener("click", function() {
+        const newState = !fpsActive;
+        toggleFPS(newState);
+        this.innerHTML = newState ? "ON" : "OFF";
+        this.style.background = newState ? "#43b581" : "#2a3040";
+    });
+
+    modsOptionsHandler.querySelector('[data-hook="bg-open-btn"]').addEventListener("click", function() {
+        backgroundOptionsHandler.removeAttribute("hidden");
+    });
+}
+
+function createModsButton() {
+    if (getByDataHook('modsbtn')) return;
+    let btn = document.createElement("button");
+    btn.setAttribute("data-hook", "modsbtn");
+    btn.innerHTML = 'Mod Options';
+    btn.addEventListener("click", function() {
+        // Sincronizar estado del boton FPS al abrir
+        const fpsBtn = modsOptionsHandler.querySelector('[data-hook="fps-toggle-btn"]');
+        if (fpsBtn) {
+            fpsBtn.innerHTML = fpsActive ? "ON" : "OFF";
+            fpsBtn.style.background = fpsActive ? "#43b581" : "#2a3040";
+        }
+        modsOptionsHandler.removeAttribute("hidden");
+    });
+    const inputBtn = getByDataHook('newinputbtn');
+    if (inputBtn) insertAfter(inputBtn, btn);
 }
 
 ///////////////////////////////////////// BACKGROUND /////////////////////////////////////////
@@ -518,35 +554,13 @@ function _doApply(cfg) {
         const r = parseInt(cfg.color.slice(1,3), 16);
         const g = parseInt(cfg.color.slice(3,5), 16);
         const b = parseInt(cfg.color.slice(5,7), 16);
-        css = `body { background: rgba(${r},${g},${b},${cfg.opacity}) !important; }`;
+        css = `body{background:rgba(${r},${g},${b},${cfg.opacity})!important;}`;
     } else if (cfg.type === "image") {
-        css = `body {
-            background-image: url('${cfg.url}') !important;
-            background-size: ${cfg.size} !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
-        }`;
+        css = `body{background-image:url('${cfg.url}')!important;background-size:${cfg.size}!important;background-repeat:no-repeat!important;background-position:center!important;}`;
     } else {
-        css = `body { background: #1a2125 !important; }`;
+        css = `body{background:#111417!important;}`;
     }
     backgroundHandler.innerHTML = css;
-}
-
-function createBackgroundButton() {
-    if (getByDataHook('bgbtn')) return;
-    let btn = document.createElement("button");
-    btn.setAttribute("data-hook", "bgbtn");
-    btn.innerHTML = '🖼 Background';
-    btn.addEventListener("click", function() {
-        backgroundOptionsHandler.removeAttribute("hidden");
-    });
-    const inputBtn = getByDataHook('newinputbtn');
-    if (inputBtn) {
-        insertAfter(inputBtn, btn);
-    } else {
-        const settingsDialog = body.querySelector('.settings-view');
-        if (settingsDialog) settingsDialog.appendChild(btn);
-    }
 }
 
 ///////////////////////////////////////// CHAT /////////////////////////////////////////
@@ -555,27 +569,19 @@ function prefabMessage(msg) {
     const input = chatbox.querySelector('input');
     input.focus();
     input.value = msg;
-    input.dispatchEvent(new KeyboardEvent("keydown", {
-        key: "Enter", bubbles: true, cancelable: true, keyCode: 13, which: 13,
-    }));
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true, keyCode: 13, which: 13 }));
 }
 
 function updatedChat() {
     const log = getByDataHook('log');
     const children = log.firstChild.children;
-    const maxChildren = 5;
     if (lastMessage !== log.firstChild.lastChild) {
-        if (children.length > maxChildren) {
-            for (let i = 0; i < children.length - maxChildren; i++) {
-                children[i].style.display = "none";
-            }
+        if (children.length > 5) {
+            for (let i = 0; i < children.length - 5; i++) children[i].style.display = "none";
         }
         const lastChild = log.firstChild.lastChild;
         lastChild.style.opacity = 1;
-        setTimeout(() => {
-            lastChild.classList.add("fade-out");
-            lastChild.removeAttribute("style");
-        }, 500);
+        setTimeout(() => { lastChild.classList.add("fade-out"); lastChild.removeAttribute("style"); }, 500);
         lastMessage = lastChild;
     }
     log.scrollTop = 0;
@@ -590,13 +596,8 @@ function chatToggle() {
 
 ///////////////////////////////////////// CONTROLS /////////////////////////////////////////
 function showControls(v) {
-    if (v) {
-        joystick.setAttribute("view", "visible");
-        kickButton.setAttribute("view", "visible");
-    } else {
-        joystick.setAttribute("view", "hidden");
-        kickButton.setAttribute("view", "hidden");
-    }
+    if (v) { joystick.setAttribute("view", "visible"); kickButton.setAttribute("view", "visible"); }
+    else   { joystick.setAttribute("view", "hidden");  kickButton.setAttribute("view", "hidden");  }
 }
 
 function updateControlsSettingsNumbers() {
@@ -629,8 +630,8 @@ function updateControlsOptions(w, m, o, f = false) {
 }
 
 function handleTouchStart(e) { isTouching = true; updateJoystick(e.touches[0]); }
-function handleTouchMove(e) { if (isTouching) updateJoystick(e.touches[0]); }
-function handleTouchEnd() { isTouching = false; resetJoystick(); }
+function handleTouchMove(e)  { if (isTouching) updateJoystick(e.touches[0]); }
+function handleTouchEnd()    { isTouching = false; resetJoystick(); }
 
 function kick(str) {
     try { gameFrame.document.dispatchEvent(new KeyboardEvent(str, { code: "KeyX" })); } catch {}
@@ -644,14 +645,10 @@ function updateJoystick(touch) {
     const deltaY = touch.clientY - centerY;
     const angle = Math.atan2(deltaY, deltaX);
     const distance = Math.min(joystick.clientWidth / 2, Math.hypot(deltaX, deltaY));
-    const thumbX = centerX + distance * Math.cos(angle);
-    const thumbY = centerY + distance * Math.sin(angle);
-    thumb.style.left = thumbX - rect.left - thumb.clientWidth / 2 + 'px';
-    thumb.style.top  = thumbY - rect.top  - thumb.clientHeight / 2 + 'px';
-    const normalizedAngle = (angle + 2 * Math.PI) % (2 * Math.PI);
-    const joystickValue = Math.round((normalizedAngle * 180 / Math.PI) / 45) % 8;
-    const dirs = ["d","sd","s","sa","a","wa","w","wd"];
-    emulateKeys(dirs[joystickValue]);
+    thumb.style.left = (centerX + distance * Math.cos(angle)) - rect.left - thumb.clientWidth / 2 + 'px';
+    thumb.style.top  = (centerY + distance * Math.sin(angle)) - rect.top  - thumb.clientHeight / 2 + 'px';
+    const joystickValue = Math.round((((angle + 2 * Math.PI) % (2 * Math.PI)) * 180 / Math.PI) / 45) % 8;
+    emulateKeys(["d","sd","s","sa","a","wa","w","wd"][joystickValue]);
 }
 
 function resetJoystick() {
@@ -714,11 +711,8 @@ function setupControls() {
     document.body.appendChild(kickButton);
 
     const controlOptions = JSON.parse(localStorage.getItem("controls"));
-    if (controlOptions === null) {
-        updateControlsOptions(20, 5, 1, true);
-    } else {
-        updateControlsOptions(controlOptions[0], controlOptions[1], controlOptions[2], true);
-    }
+    if (controlOptions === null) { updateControlsOptions(20, 5, 1, true); }
+    else { updateControlsOptions(controlOptions[0], controlOptions[1], controlOptions[2], true); }
     resetJoystick();
 }
 
@@ -727,56 +721,38 @@ let previousDigitalStickState = "";
 let previousAnalogStickState = "";
 let isXButtonPressed = false;
 
-window.addEventListener("gamepadconnected", (event) => {
-    console.log("Gamepad connected:", event.gamepad);
-    checkGamepadState(event.gamepad);
-});
-window.addEventListener("gamepaddisconnected", (event) => {
-    console.log("Gamepad disconnected:", event.gamepad);
-});
+window.addEventListener("gamepadconnected", (e) => { checkGamepadState(e.gamepad); });
+window.addEventListener("gamepaddisconnected", (e) => { console.log("Gamepad disconnected:", e.gamepad); });
 
 function checkGamepadState(gamepad) {
     requestAnimationFrame(() => {
-        const axes    = gamepad.axes;
+        const axes = gamepad.axes;
         const buttons = gamepad.buttons;
-        const dState  = getDigitalStickState(axes[0], axes[1]);
+        const dState = getDigitalStickState(axes[0], axes[1]);
         if (dState.changed) { emulateKeys(dState.direction); previousDigitalStickState = dState.direction; }
-        const aState  = getAnalogStickState(axes[2], axes[3]);
+        const aState = getAnalogStickState(axes[2], axes[3]);
         if (aState.changed) { emulateKeys(aState.direction); previousAnalogStickState = aState.direction; }
-        if ((buttons[0].pressed || buttons[2].pressed) && !isXButtonPressed) {
-            kick("keydown"); isXButtonPressed = true;
-        } else if (!buttons[0].pressed && !buttons[2].pressed) {
-            kick("keyup"); isXButtonPressed = false;
-        }
+        if ((buttons[0].pressed || buttons[2].pressed) && !isXButtonPressed) { kick("keydown"); isXButtonPressed = true; }
+        else if (!buttons[0].pressed && !buttons[2].pressed) { kick("keyup"); isXButtonPressed = false; }
         checkGamepadState(navigator.getGamepads()[gamepad.index]);
     });
 }
 
 function getDigitalStickState(x, y) {
     const threshold = 0.5, center = 0.1;
-    if (Math.abs(x) < center && Math.abs(y) < center)
-        return { changed: previousDigitalStickState !== "Center", direction: "Center" };
-    if (Math.abs(x) > threshold || Math.abs(y) > threshold) {
-        const direction = getDirection(x, y);
-        return { changed: direction !== previousDigitalStickState, direction };
-    }
+    if (Math.abs(x) < center && Math.abs(y) < center) return { changed: previousDigitalStickState !== "Center", direction: "Center" };
+    if (Math.abs(x) > threshold || Math.abs(y) > threshold) { const d = getDirection(x,y); return { changed: d !== previousDigitalStickState, direction: d }; }
     return { changed: false };
 }
 
 function getAnalogStickState(x, y) {
     const threshold = 0.5, center = 0.1;
-    if (Math.abs(x) < center && Math.abs(y) < center)
-        return { changed: previousAnalogStickState !== "Center", direction: "Center" };
-    if (Math.abs(x) > threshold || Math.abs(y) > threshold) {
-        const direction = getDirection(x, y);
-        return { changed: direction !== previousAnalogStickState, direction };
-    }
+    if (Math.abs(x) < center && Math.abs(y) < center) return { changed: previousAnalogStickState !== "Center", direction: "Center" };
+    if (Math.abs(x) > threshold || Math.abs(y) > threshold) { const d = getDirection(x,y); return { changed: d !== previousAnalogStickState, direction: d }; }
     return { changed: false };
 }
 
 function getDirection(x, y) {
-    const angle  = Math.atan2(y, x);
-    const deg    = (angle >= 0 ? angle : (2 * Math.PI + angle)) * (180 / Math.PI);
-    const sector = Math.round(deg / 45) % 8;
-    return ["d","sd","s","sa","a","aw","w","wd"][sector];
+    const deg = (Math.atan2(y,x) >= 0 ? Math.atan2(y,x) : (2*Math.PI+Math.atan2(y,x))) * (180/Math.PI);
+    return ["d","sd","s","sa","a","aw","w","wd"][Math.round(deg/45)%8];
 }
