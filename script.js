@@ -18,32 +18,101 @@ const constrolsStyleBase = "#joystick,#kick{z-index:100;bottom:CONTROLS_MARGINvw
 
 const countryFilterHandler = document.createElement('style');
 const hideButtons = document.createElement('style');
-
 hideButtons.innerHTML = "button{display:none}";
 gameFrame.document.head.appendChild(hideButtons);
 
 const controlsHandler = document.createElement('style');
-const backgroundHandler = document.createElement('style'); // ← NUEVO
-
+const backgroundHandler = document.createElement('style');
 const copyrightHandler = document.createElement("span");
 const aboutHandler = document.createElement("div");
 const inputOptionsHandler = document.createElement("div");
-
-// ← NUEVO: panel de background
 const backgroundOptionsHandler = document.createElement("div");
-
 const config = { childList: true, subtree: true };
 
 ///////////////////////////////////////// VARIABLES /////////////////////////////////////////
-
 let firstTime = true;
 let canResetJoystick = true;
 let lastMessage;
 let joystick;
 let kickButton;
 
-///////////////////////////////////////// MAIN /////////////////////////////////////////
+///////////////////////////////////////// FPS COUNTER /////////////////////////////////////////
+let fpsCounter = null;
+let fpsActive = false;
+let fpsFrames = 0;
+let fpsLastTime = performance.now();
+let fpsAnimFrame = null;
 
+function setupFPS() {
+    fpsCounter = document.createElement("div");
+    fpsCounter.setAttribute("id", "fps-counter");
+    fpsCounter.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.6);
+        color: #00ff88;
+        font-size: 14px;
+        font-family: monospace;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 6px;
+        z-index: 9999;
+        display: none;
+        pointer-events: none;
+    `;
+    fpsCounter.innerHTML = "FPS: --";
+    document.body.appendChild(fpsCounter);
+}
+
+function fpsLoop() {
+    fpsFrames++;
+    const now = performance.now();
+    const delta = now - fpsLastTime;
+    if (delta >= 500) {
+        const fps = Math.round((fpsFrames * 1000) / delta);
+        fpsCounter.innerHTML = `FPS: ${fps}`;
+        if (fps >= 55) fpsCounter.style.color = "#00ff88";
+        else if (fps >= 30) fpsCounter.style.color = "#ffcc00";
+        else fpsCounter.style.color = "#ff4444";
+        fpsFrames = 0;
+        fpsLastTime = now;
+    }
+    fpsAnimFrame = requestAnimationFrame(fpsLoop);
+}
+
+function toggleFPS(active) {
+    fpsActive = active;
+    if (active) {
+        fpsCounter.style.display = "block";
+        fpsFrames = 0;
+        fpsLastTime = performance.now();
+        fpsAnimFrame = requestAnimationFrame(fpsLoop);
+        localStorage.setItem("fps_enabled", "1");
+    } else {
+        fpsCounter.style.display = "none";
+        if (fpsAnimFrame) cancelAnimationFrame(fpsAnimFrame);
+        localStorage.setItem("fps_enabled", "0");
+    }
+}
+
+function createFPSButton() {
+    if (getByDataHook('fpsbtn')) return;
+    let btn = document.createElement("button");
+    btn.setAttribute("data-hook", "fpsbtn");
+    btn.innerHTML = fpsActive ? "📊 FPS: ON" : "📊 FPS: OFF";
+    btn.style.backgroundColor = fpsActive ? "#43b581" : "";
+    btn.addEventListener("click", function() {
+        const newState = !fpsActive;
+        toggleFPS(newState);
+        btn.innerHTML = newState ? "📊 FPS: ON" : "📊 FPS: OFF";
+        btn.style.backgroundColor = newState ? "#43b581" : "";
+    });
+    const inputBtn = getByDataHook('newinputbtn');
+    if (inputBtn) insertAfter(inputBtn, btn);
+}
+
+///////////////////////////////////////// MAIN /////////////////////////////////////////
 var checkLoaderInterval = setInterval(checkLoader, 1000);
 
 function checkLoader() {
@@ -57,14 +126,16 @@ function checkLoader() {
 function init() {
     document.querySelector('.rightbar').remove();
     document.querySelector('.header').remove();
-
     document.querySelector("meta[name=viewport]").setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=0');
 
     setupCountryFilter();
     setupControls();
-    setupBackground(); // ← NUEVO
+    setupBackground();
+    setupFPS();
     setupCopyright(true);
     hideButtons.remove();
+
+    if (localStorage.getItem("fps_enabled") === "1") toggleFPS(true);
 
     const observer = new MutationObserver(function(mutationsList, observer) {
         try { updateUI(); updatedChat(); } catch {}
@@ -72,7 +143,6 @@ function init() {
     try { updateUI() } catch {}
     observer.observe(body, config);
 
-    gameFrame.head.innerHTML += "<style>button{display: }</style>";
     aboutHandler.setAttribute('data-hook', 'about');
     aboutHandler.style.cssText = 'background: #1a2125; position: absolute; width: 100%; height: 100%; display: none; justify-content: center; flex-direction: column; align-items: center; margin: 0;';
     aboutHandler.innerHTML = '<div class="dialog basic-dialog" style="max-width: 50%;"><h1>About us</h1><p>We are Vixel Dev, a small development studio that wants the Haxball community to grow, without hurting its owners. We do not monetize this application, as it is free and contains no ads. </p><p>We want to thank @basro for creating this game, and we hope not to disturb with this port. </p><p></p><p>To contact us:</p><p>E-mail: vixeldev@gmail.com</p><p>Instragram: @haxballmobile</p><div class="buttons"><button data-hook="closeabout">Close</button></div></div>';
@@ -92,7 +162,6 @@ function init() {
 }
 
 ///////////////////////////////////////// UTILS /////////////////////////////////////////
-
 function insertAfter(e, n) {
     e.parentNode.insertBefore(n, e.nextSibling);
 }
@@ -125,7 +194,6 @@ function searchRoomlist() {
 }
 
 ///////////////////////////////////////// UI /////////////////////////////////////////
-
 function setupCountryFilter() {
     countryFilterHandler.innerHTML = "";
     countryFilterHandler.name = "stylesheet";
@@ -173,7 +241,8 @@ function updateUI() {
             }
         } catch {}
         if (!getByDataHook('newinputbtn')) createInputButton();
-        if (!getByDataHook('bgbtn')) createBackgroundButton(); // ← NUEVO
+        if (!getByDataHook('bgbtn')) createBackgroundButton();
+        if (!getByDataHook('fpsbtn')) createFPSButton();
         canResetJoystick = true;
     } else if (body.querySelector('.g-recaptcha-response')) {
         copyright(false);
@@ -237,12 +306,10 @@ function createSearchbar() {
     inputContainer.className = "label-input";
     inputContainer.style.backgroundColor = "transparent";
     inputContainer.innerHTML = '<label>Search a room:</label><input data-hook="search" type="text">';
-
     const dialog = body.querySelector("div.dialog");
     const secondParagraph = dialog.querySelector("p:nth-child(2)");
     insertAfter(secondParagraph, inputContainer);
     secondParagraph.innerHTML = pickRandom(tips);
-
     const input = inputContainer.querySelector('input');
     input.addEventListener("input", searchRoomlist);
 }
@@ -331,8 +398,7 @@ function setupGameUI() {
     }
     if (firstTime) {
         body.querySelector('.drag').remove();
-        const statsViewContainer = body.querySelector('.stats-view-container');
-        statsViewContainer.style.cssText = "display: none;";
+        body.querySelector('.stats-view-container').style.cssText = "display: none;";
         getByDataHook('log-contents').firstChild.remove();
         getByDataHook('menu').innerHTML = '<i class="icon-menu"></i>';
         const inputStyle = chat.querySelector('.input').style;
@@ -342,13 +408,10 @@ function setupGameUI() {
     }
 }
 
-///////////////////////////////////////// BACKGROUND ← NUEVO /////////////////////////////////////////
-
+///////////////////////////////////////// BACKGROUND /////////////////////////////////////////
 function setupBackground() {
-    // Inyectar el styleHandler en el iframe
     gameFrame.document.head.appendChild(backgroundHandler);
 
-    // Construir panel de opciones
     backgroundOptionsHandler.setAttribute("class", "input-options");
     backgroundOptionsHandler.setAttribute("hidden", "");
     backgroundOptionsHandler.style.zIndex = "30";
@@ -358,15 +421,11 @@ function setupBackground() {
             <button data-hook="closebg" style="position:absolute;top:12px;right:10px">Back</button>
             <div class="tabcontents">
                 <div class="section selected" style="flex-direction:column;gap:12px;padding:10px">
-
-                    <!-- TAB SELECTOR -->
                     <div style="display:flex;gap:8px;width:100%">
                         <button data-hook="bg-tab-color" style="flex:1;opacity:1">Color</button>
                         <button data-hook="bg-tab-image" style="flex:1;opacity:0.5">Image URL</button>
-                        <button data-hook="bg-tab-none"  style="flex:1;opacity:0.5">None</button>
+                        <button data-hook="bg-tab-none" style="flex:1;opacity:0.5">None</button>
                     </div>
-
-                    <!-- PANEL COLOR -->
                     <div data-hook="bg-panel-color" style="display:flex;flex-direction:column;gap:10px;width:100%">
                         <div class="option-row" style="gap:10px">
                             <label style="flex:1">Pick color</label>
@@ -379,8 +438,6 @@ function setupBackground() {
                         </div>
                         <button data-hook="bg-apply-color">Apply color</button>
                     </div>
-
-                    <!-- PANEL IMAGE -->
                     <div data-hook="bg-panel-image" style="display:none;flex-direction:column;gap:10px;width:100%">
                         <div class="label-input" style="background:transparent">
                             <label>Image URL:</label>
@@ -396,7 +453,6 @@ function setupBackground() {
                         </div>
                         <button data-hook="bg-apply-image">Apply image</button>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -404,12 +460,10 @@ function setupBackground() {
 
     body.parentNode.appendChild(backgroundOptionsHandler);
 
-    // Cerrar panel
     backgroundOptionsHandler.querySelector('[data-hook="closebg"]').addEventListener("click", function() {
         backgroundOptionsHandler.setAttribute("hidden", "");
     });
 
-    // Tabs
     const tabs = {
         color: backgroundOptionsHandler.querySelector('[data-hook="bg-tab-color"]'),
         image: backgroundOptionsHandler.querySelector('[data-hook="bg-tab-image"]'),
@@ -427,26 +481,20 @@ function setupBackground() {
 
     tabs.color.addEventListener("click", () => setTab("color"));
     tabs.image.addEventListener("click", () => setTab("image"));
-    tabs.none.addEventListener("click", () => {
-        setTab("none");
-        applyBackground("none");
-    });
+    tabs.none.addEventListener("click", () => { setTab("none"); applyBackground("none"); });
 
-    // Opacity slider live update
     const opacitySlider = backgroundOptionsHandler.querySelector('[data-hook="bg-opacity-slider"]');
     const opacityVal    = backgroundOptionsHandler.querySelector('[data-hook="bg-opacity-val"]');
     opacitySlider.addEventListener("input", () => {
         opacityVal.innerHTML = parseFloat(opacitySlider.value).toFixed(2);
     });
 
-    // Apply color
     backgroundOptionsHandler.querySelector('[data-hook="bg-apply-color"]').addEventListener("click", function() {
         const color   = backgroundOptionsHandler.querySelector('[data-hook="bg-color-picker"]').value;
         const opacity = opacitySlider.value;
         applyBackground("color", { color, opacity });
     });
 
-    // Apply image
     backgroundOptionsHandler.querySelector('[data-hook="bg-apply-image"]').addEventListener("click", function() {
         const url  = backgroundOptionsHandler.querySelector('[data-hook="bg-image-url"]').value.trim();
         const size = backgroundOptionsHandler.querySelector('[data-hook="bg-image-size"]').value;
@@ -454,7 +502,6 @@ function setupBackground() {
         applyBackground("image", { url, size });
     });
 
-    // Restaurar configuración guardada
     const saved = JSON.parse(localStorage.getItem("bg_config") || "null");
     if (saved) _doApply(saved);
 }
@@ -468,7 +515,6 @@ function applyBackground(type, opts = {}) {
 function _doApply(cfg) {
     let css = "";
     if (cfg.type === "color") {
-        // Convertir hex + opacity a rgba
         const r = parseInt(cfg.color.slice(1,3), 16);
         const g = parseInt(cfg.color.slice(3,5), 16);
         const b = parseInt(cfg.color.slice(5,7), 16);
@@ -481,13 +527,11 @@ function _doApply(cfg) {
             background-position: center !important;
         }`;
     } else {
-        // none — volver al default
         css = `body { background: #1a2125 !important; }`;
     }
     backgroundHandler.innerHTML = css;
 }
 
-// ← NUEVO: botón en Settings que abre el panel
 function createBackgroundButton() {
     if (getByDataHook('bgbtn')) return;
     let btn = document.createElement("button");
@@ -496,19 +540,16 @@ function createBackgroundButton() {
     btn.addEventListener("click", function() {
         backgroundOptionsHandler.removeAttribute("hidden");
     });
-    // Insertarlo después del botón de input controls
     const inputBtn = getByDataHook('newinputbtn');
     if (inputBtn) {
         insertAfter(inputBtn, btn);
     } else {
-        // fallback: agregarlo al settings dialog
         const settingsDialog = body.querySelector('.settings-view');
         if (settingsDialog) settingsDialog.appendChild(btn);
     }
 }
 
 ///////////////////////////////////////// CHAT /////////////////////////////////////////
-
 function prefabMessage(msg) {
     const chatbox = body.querySelector('.chatbox-view');
     const input = chatbox.querySelector('input');
@@ -548,7 +589,6 @@ function chatToggle() {
 }
 
 ///////////////////////////////////////// CONTROLS /////////////////////////////////////////
-
 function showControls(v) {
     if (v) {
         joystick.setAttribute("view", "visible");
@@ -683,7 +723,6 @@ function setupControls() {
 }
 
 ///////////////////////////////////////// GAMEPAD /////////////////////////////////////////
-
 let previousDigitalStickState = "";
 let previousAnalogStickState = "";
 let isXButtonPressed = false;
@@ -698,11 +737,11 @@ window.addEventListener("gamepaddisconnected", (event) => {
 
 function checkGamepadState(gamepad) {
     requestAnimationFrame(() => {
-        const axes   = gamepad.axes;
+        const axes    = gamepad.axes;
         const buttons = gamepad.buttons;
-        const dState = getDigitalStickState(axes[0], axes[1]);
+        const dState  = getDigitalStickState(axes[0], axes[1]);
         if (dState.changed) { emulateKeys(dState.direction); previousDigitalStickState = dState.direction; }
-        const aState = getAnalogStickState(axes[2], axes[3]);
+        const aState  = getAnalogStickState(axes[2], axes[3]);
         if (aState.changed) { emulateKeys(aState.direction); previousAnalogStickState = aState.direction; }
         if ((buttons[0].pressed || buttons[2].pressed) && !isXButtonPressed) {
             kick("keydown"); isXButtonPressed = true;
@@ -736,8 +775,8 @@ function getAnalogStickState(x, y) {
 }
 
 function getDirection(x, y) {
-    const angle = Math.atan2(y, x);
-    const deg   = (angle >= 0 ? angle : (2 * Math.PI + angle)) * (180 / Math.PI);
+    const angle  = Math.atan2(y, x);
+    const deg    = (angle >= 0 ? angle : (2 * Math.PI + angle)) * (180 / Math.PI);
     const sector = Math.round(deg / 45) % 8;
     return ["d","sd","s","sa","a","aw","w","wd"][sector];
 }
