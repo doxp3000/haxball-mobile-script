@@ -12,6 +12,7 @@ let body;
 
 const tips = [
     "Haxball Mobile Mod V1",
+    
 ];
 
 const constrolsStyleBase = "#joystick,#kick{z-index:100;bottom:CONTROLS_MARGINvw}.neo{opacity:CONTROLS_OPACITY;background-color:#c2c2c255;box-shadow:6px 6px 10px 0 #a5abb133,-5px -5px 9px 0 #a5abb133;color:#dedede55;font-weight:bolder;font-size:0.1rem}.sizer{width:CONTROLS_WIDTH%;aspect-ratio: 1 / 1;}#joystick{left:CONTROLS_MARGIN%;overflow:visible}#thumb{width:40%;height:40%;background-color:#ecf0f3cc}#kick{right:CONTROLS_MARGIN%}button.neo:active{opacity:KICK_OPACITY}";
@@ -23,14 +24,12 @@ hideButtons.innerHTML = "button{display:none}";
 gameFrame.document.head.appendChild(hideButtons);
 
 const controlsHandler = document.createElement('style');
-const backgroundHandler = document.createElement('style'); // ← NUEVO
 
 const copyrightHandler = document.createElement("span");
-const aboutHandler = document.createElement("div");
-const inputOptionsHandler = document.createElement("div");
 
-// ← NUEVO: panel de background
-const backgroundOptionsHandler = document.createElement("div");
+const aboutHandler = document.createElement("div");
+
+const inputOptionsHandler = document.createElement("div");
 
 const config = { childList: true, subtree: true };
 
@@ -55,19 +54,28 @@ function checkLoader() {
 }
 
 function init() {
+    //Remove ads and header
     document.querySelector('.rightbar').remove();
     document.querySelector('.header').remove();
 
     document.querySelector("meta[name=viewport]").setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=0');
 
+    //const viewportTag = document.createElement('meta');
+    //viewportTag.name = 'viewport';
+    //viewportTag.content = 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=0';
+    //gameFrame.document.head.appendChild(viewportTag);
+
     setupCountryFilter();
     setupControls();
-    setupBackground(); // ← NUEVO
     setupCopyright(true);
     hideButtons.remove();
 
+    //Mutation observer
     const observer = new MutationObserver(function(mutationsList, observer) {
-        try { updateUI(); updatedChat(); } catch {}
+        try {
+            updateUI();
+            updatedChat();
+        } catch {}
     });
     try { updateUI() } catch {}
     observer.observe(body, config);
@@ -80,15 +88,15 @@ function init() {
     body.parentNode.appendChild(aboutHandler);
     if (localStorage.getItem("firstTime") === null) {
         aboutHandler.style.display = 'flex';
-        localStorage.setItem("firstTime", true);
-        localStorage.setItem("view_mode", 1);
-        localStorage.setItem("resolution_scale", 0.75);
+        localStorage.setItem("firstTime", true)
+        localStorage.setItem("view_mode", 1)
+        localStorage.setItem("resolution_scale", 0.75)
     }
     body.parentNode.querySelector('[data-hook="closeabout"]').addEventListener("click", function() {
         aboutHandler.style.display = 'none';
     });
 
-    console.log("PAGE_LOADED");
+    console.log("PAGE_LOADED")
 }
 
 ///////////////////////////////////////// UTILS /////////////////////////////////////////
@@ -98,8 +106,12 @@ function insertAfter(e, n) {
 }
 
 function pickRandom(arr) {
-    if (!Array.isArray(arr) || arr.length === 0) return null;
-    return arr[Math.floor(Math.random() * arr.length)];
+    if (!Array.isArray(arr) || arr.length === 0) {
+        return null; // Return null for invalid input or empty array
+    }
+
+    const randomIndex = Math.floor(Math.random() * arr.length);
+    return arr[randomIndex];
 }
 
 function getByDataHook(dataHook) {
@@ -108,7 +120,10 @@ function getByDataHook(dataHook) {
 
 function openHaxballURL(uri) {
     const code = uri.replace(/^https?:\/\/(www\.)?haxball\.com\/play\?c=/, "");
-    if (code.length > 0) window.location.replace("https://www.haxball.com/play?c=" + code);
+
+    if (code.length > 0) {
+        window.location.replace("https://www.haxball.com/play?c=" + code);
+    }
 }
 
 function searchRoomlist() {
@@ -117,7 +132,7 @@ function searchRoomlist() {
     rows.forEach(row => {
         const spanName = row.querySelector('span[data-hook="name"]');
         if (spanName && !spanName.textContent.toLowerCase().includes(searchValue)) {
-            row.style.display = 'none';
+            row.style.display = 'none'
         } else {
             row.removeAttribute("style");
         }
@@ -145,11 +160,13 @@ function copyright(s) {
 
 function updateUI() {
     if (body.querySelector('.choose-nickname-view')) {
+        //Chose nickname
         showControls(false);
         copyright(true);
-        console.log("PAGE_LOADED");
+        console.log("PAGE_LOADED")
     }
     if (body.querySelector('.roomlist-view')) {
+        //Roomlist
         copyright(false);
         firstTime = true;
         if (!getByDataHook('search')) createSearchbar();
@@ -159,13 +176,17 @@ function updateUI() {
         if (getByDataHook('count')) getByDataHook('count').remove();
         showControls(false);
     } else if (body.querySelector('.create-room-view')) {
+        //Create room
         copyright(true);
         showControls(false);
     } else if (body.querySelector('.settings-view')) {
+        //Settings
         copyright(false);
-        if (inputOptionsHandler.getAttribute("hidden") != null) showControls(false);
+        if (inputOptionsHandler.getAttribute("hidden") != null) {
+            showControls(false);
+        }
         try {
-            const videoSec = getByDataHook('videosec');
+            const videoSec = getByDataHook('videosec')
             if (videoSec.children.length == 10) {
                 videoSec.lastChild.remove();
                 videoSec.lastChild.remove();
@@ -173,14 +194,15 @@ function updateUI() {
             }
         } catch {}
         if (!getByDataHook('newinputbtn')) createInputButton();
-        if (!getByDataHook('bgbtn')) createBackgroundButton(); // ← NUEVO
         canResetJoystick = true;
     } else if (body.querySelector('.g-recaptcha-response')) {
+        //Captha
         copyright(false);
         showControls(false);
         resetJoystick();
         canResetJoystick = true;
     } else if (body.querySelector('.game-view') && !body.querySelector('.room-view')) {
+        //In game
         if (canResetJoystick) {
             copyright(false);
             showControls(true);
@@ -189,6 +211,7 @@ function updateUI() {
             canResetJoystick = false;
         }
     } else if (body.querySelector('.game-view') && !body.querySelector('.room-link-view')) {
+        //Room admin
         copyright(false);
         showControls(false);
         if (!getByDataHook('store')) createStoreButton();
@@ -205,10 +228,10 @@ function updateUI() {
 function createInputButton() {
     var el = getByDataHook('inputbtn');
     var elClone = el.cloneNode(true);
-    elClone.setAttribute("data-hook", "newinputbtn");
+    elClone.setAttribute("data-hook", "newinputbtn")
     elClone.addEventListener("click", function() {
         showControls(true);
-        inputOptionsHandler.removeAttribute("hidden");
+        inputOptionsHandler.removeAttribute("hidden")
         resetJoystick();
     });
     el.parentNode.replaceChild(elClone, el);
@@ -220,7 +243,7 @@ function createShareButton() {
     share.innerHTML = 'Share';
     insertAfter(getByDataHook('copy'), share);
     share.addEventListener("click", function() {
-        console.log("SHARE_MESSAGE🎮⚽️ Join my Haxball Mobile room by copying and pasting the following link: " + getByDataHook('link').value);
+        console.log("SHARE_MESSAGE🎮⚽️ Join my Haxball Mobile room by copying and pasting the following link: " + getByDataHook('link').value)
     });
 }
 
@@ -229,18 +252,23 @@ function createStoreButton() {
     store.setAttribute("data-hook", "store");
     store.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 407 407" fill="white" style="height:0.85em; width: auto"><path d="M402 84 323 5c-3-3-7-5-12-5H17C8 0 0 8 0 17v373c0 9 8 17 17 17h373c9 0 17-8 17-17V96c0-4-2-9-5-12zm-101 80H67V39h234v125z"></path><path d="M214 148h43c3 0 6-2 6-6V60c0-4-3-6-6-6h-43c-3 0-6 2-6 6v82c0 4 3 6 6 6z"></path></svg> Store';
     insertAfter(getByDataHook('rec-btn'), store);
-    store.addEventListener("click", function() { prefabMessage("/store"); });
+    store.addEventListener("click", function() {
+        prefabMessage("/store")
+    });
 }
 
 function createSearchbar() {
     const inputContainer = document.createElement("div");
     inputContainer.className = "label-input";
     inputContainer.style.backgroundColor = "transparent";
+
     inputContainer.innerHTML = '<label>Search a room:</label><input data-hook="search" type="text">';
 
     const dialog = body.querySelector("div.dialog");
     const secondParagraph = dialog.querySelector("p:nth-child(2)");
+
     insertAfter(secondParagraph, inputContainer);
+
     secondParagraph.innerHTML = pickRandom(tips);
 
     const input = inputContainer.querySelector('input');
@@ -251,56 +279,79 @@ function createURLButton() {
     let button = document.createElement("button");
     button.setAttribute("data-hook", "url-room");
     button.innerHTML = '<i class="icon-link"></i><div>URL Room</div>';
+
     button.addEventListener("click", function() {
         if (!body.querySelector('[data-hook="input-url"]')) {
             let urlForm = document.createElement("form");
             urlForm.action = "javascript:void(0);";
             urlForm.innerHTML = '<div class="label-input" style="background-color: transparent"><label>URL:</label><input data-hook="input-url" type="url"></div>';
-            insertAfter(body.querySelector("div.dialog > p:nth-child(2)"), urlForm);
+            insertAfter(body.querySelector("div.dialog > p:nth-child(2)"), urlForm)
             getByDataHook('search').parentNode.style.display = "none";
             getByDataHook('input-url').focus();
             getByDataHook('input-url').addEventListener('blur', function() {
                 getByDataHook('search').parentNode.style.display = "flex";
-                urlForm.remove();
-            });
-            urlForm.addEventListener('submit', function() { openHaxballURL(getByDataHook('input-url').value); });
+                urlForm.remove()
+            })
+            urlForm.addEventListener('submit', function() { openHaxballURL(getByDataHook('input-url').value) })
         }
     });
-    insertAfter(getByDataHook('join'), button);
+    insertAfter(getByDataHook('join'), button)
 }
 
 function createAboutButton() {
     if (getByDataHook('aboutbtn')) return;
+
     let button = document.createElement("button");
     button.setAttribute("data-hook", "aboutbtn");
     button.innerHTML = '<i class="icon-link"></i><div>Discord</div>';
+    
     button.style.backgroundColor = "#5865F2";
     button.style.color = "white";
-    button.style.transition = "all 0.3s ease";
+    button.style.transition = "all 0.3s ease"; // Para que el cambio de color sea suave
+
     button.addEventListener("click", function() {
         const discordURL = "https://discord.gg/q27tF7CG5";
+
+        // Intentar copiar al portapapeles
         navigator.clipboard.writeText(discordURL).then(() => {
+            // Efecto visual de "Copiado"
             const originalHTML = button.innerHTML;
             button.innerHTML = '<i class="icon-ok"></i><div>¡Copiado!</div>';
-            button.style.backgroundColor = "#43b581";
+            button.style.backgroundColor = "#43b581"; // Color verde éxito de Discord
+            
+            // Volver al estado original después de 1.5 segundos
             setTimeout(() => {
                 button.innerHTML = originalHTML;
                 button.style.backgroundColor = "#5865F2";
             }, 1500);
-        }).catch(() => { alert("Link: " + discordURL); });
+            
+            console.log("Link de Discord copiado al portapapeles");
+        }).catch(err => {
+            // Por si el navegador es muy antiguo y no soporta clipboard API
+            alert("Link: " + discordURL); 
+        });
     });
+
     let container = body.querySelector(".roomlist-view .buttons");
-    if (container) container.appendChild(button);
+    if (container) {
+        container.appendChild(button);
+    }
 }
+
 
 function filterCountries(button) {
     const geoData = localStorage.getItem('geo_override') || localStorage.getItem('geo');
+
     if (geoData) {
-        const code = JSON.parse(geoData)['code'];
+        const parsedData = JSON.parse(geoData);
+
+        const code = parsedData['code'];
+
         const iconClass = button.lastChild.getAttribute("class");
+
         if (iconClass === "icon-cancel") {
             button.lastChild.setAttribute("class", "icon-ok");
-            countryFilterHandler.innerHTML = "";
+            countryFilterHandler.innerHTML = ""
         } else {
             button.lastChild.setAttribute("class", "icon-cancel");
             countryFilterHandler.innerHTML = "tr:not(:has(div.f-" + code + ")){display: none;}";
@@ -315,12 +366,14 @@ function createCountryButton() {
     button.setAttribute("data-hook", "fil-cou");
     button.innerHTML = 'Show other countries <i class="icon-ok"></i>';
     countryFilterHandler.innerHTML = "";
-    button.addEventListener("click", function() { filterCountries(button); });
+    button.addEventListener("click", function() { filterCountries(button) });
+
     body.querySelector('.filters').prepend(button);
 }
 
 function setupGameUI() {
     const chat = body.querySelector('.chatbox-view');
+
     if (!getByDataHook('chat-toggle')) {
         const button = document.createElement("button");
         button.setAttribute("data-hook", "chat-toggle");
@@ -329,6 +382,7 @@ function setupGameUI() {
         button.addEventListener("click", chatToggle);
         body.querySelector('.sound-button-container').parentNode.prepend(button);
     }
+
     if (firstTime) {
         body.querySelector('.drag').remove();
         const statsViewContainer = body.querySelector('.stats-view-container');
@@ -340,171 +394,21 @@ function setupGameUI() {
         chat.querySelector('input').addEventListener('blur', function() { inputStyle.display = 'none'; });
         firstTime = false;
     }
-}
+  function createDiscordButton() {
+    let button = document.createElement("button");
+    button.setAttribute("data-hook", "discord-btn");
+    // Usamos el icono de "link" que ya viene en el juego o texto
+    button.innerHTML = '<i class="icon-link"></i><div>Discord</div>';
+    button.style.backgroundColor = "#5865F2"; // Color oficial de Discord
+    button.style.color = "white";
 
-///////////////////////////////////////// BACKGROUND ← NUEVO /////////////////////////////////////////
-
-function setupBackground() {
-    // Inyectar el styleHandler en el iframe
-    gameFrame.document.head.appendChild(backgroundHandler);
-
-    // Construir panel de opciones
-    backgroundOptionsHandler.setAttribute("class", "input-options");
-    backgroundOptionsHandler.setAttribute("hidden", "");
-    backgroundOptionsHandler.style.zIndex = "30";
-    backgroundOptionsHandler.innerHTML = `
-        <div class="dialog settings-view" style="height:min-content;max-width:400px;margin:auto;position:relative;top:50%;transform:translateY(-50%)">
-            <h1>Background</h1>
-            <button data-hook="closebg" style="position:absolute;top:12px;right:10px">Back</button>
-            <div class="tabcontents">
-                <div class="section selected" style="flex-direction:column;gap:12px;padding:10px">
-
-                    <!-- TAB SELECTOR -->
-                    <div style="display:flex;gap:8px;width:100%">
-                        <button data-hook="bg-tab-color" style="flex:1;opacity:1">Color</button>
-                        <button data-hook="bg-tab-image" style="flex:1;opacity:0.5">Image URL</button>
-                        <button data-hook="bg-tab-none"  style="flex:1;opacity:0.5">None</button>
-                    </div>
-
-                    <!-- PANEL COLOR -->
-                    <div data-hook="bg-panel-color" style="display:flex;flex-direction:column;gap:10px;width:100%">
-                        <div class="option-row" style="gap:10px">
-                            <label style="flex:1">Pick color</label>
-                            <input data-hook="bg-color-picker" type="color" value="#1a2125" style="width:50px;height:35px;border:none;background:none;cursor:pointer">
-                        </div>
-                        <div class="option-row" style="gap:10px">
-                            <label style="flex:1">Opacity</label>
-                            <div data-hook="bg-opacity-val" style="width:40px">1</div>
-                            <input data-hook="bg-opacity-slider" class="slider" type="range" min="0.1" max="1" step="0.01" value="1">
-                        </div>
-                        <button data-hook="bg-apply-color">Apply color</button>
-                    </div>
-
-                    <!-- PANEL IMAGE -->
-                    <div data-hook="bg-panel-image" style="display:none;flex-direction:column;gap:10px;width:100%">
-                        <div class="label-input" style="background:transparent">
-                            <label>Image URL:</label>
-                            <input data-hook="bg-image-url" type="url" placeholder="https://...">
-                        </div>
-                        <div class="option-row" style="gap:10px">
-                            <label style="flex:1">Size</label>
-                            <select data-hook="bg-image-size">
-                                <option value="cover">Cover</option>
-                                <option value="contain">Contain</option>
-                                <option value="100% 100%">Stretch</option>
-                            </select>
-                        </div>
-                        <button data-hook="bg-apply-image">Apply image</button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    `;
-
-    body.parentNode.appendChild(backgroundOptionsHandler);
-
-    // Cerrar panel
-    backgroundOptionsHandler.querySelector('[data-hook="closebg"]').addEventListener("click", function() {
-        backgroundOptionsHandler.setAttribute("hidden", "");
+    button.addEventListener("click", function() {
+        window.open("https://discord.gg/TU_LINK", "_blank"); // Cambia TU_LINK por el tuyo
     });
 
-    // Tabs
-    const tabs = {
-        color: backgroundOptionsHandler.querySelector('[data-hook="bg-tab-color"]'),
-        image: backgroundOptionsHandler.querySelector('[data-hook="bg-tab-image"]'),
-        none:  backgroundOptionsHandler.querySelector('[data-hook="bg-tab-none"]'),
-    };
-    const panels = {
-        color: backgroundOptionsHandler.querySelector('[data-hook="bg-panel-color"]'),
-        image: backgroundOptionsHandler.querySelector('[data-hook="bg-panel-image"]'),
-    };
-
-    function setTab(active) {
-        Object.keys(tabs).forEach(k => tabs[k].style.opacity = k === active ? "1" : "0.5");
-        Object.keys(panels).forEach(k => panels[k].style.display = k === active ? "flex" : "none");
-    }
-
-    tabs.color.addEventListener("click", () => setTab("color"));
-    tabs.image.addEventListener("click", () => setTab("image"));
-    tabs.none.addEventListener("click", () => {
-        setTab("none");
-        applyBackground("none");
-    });
-
-    // Opacity slider live update
-    const opacitySlider = backgroundOptionsHandler.querySelector('[data-hook="bg-opacity-slider"]');
-    const opacityVal    = backgroundOptionsHandler.querySelector('[data-hook="bg-opacity-val"]');
-    opacitySlider.addEventListener("input", () => {
-        opacityVal.innerHTML = parseFloat(opacitySlider.value).toFixed(2);
-    });
-
-    // Apply color
-    backgroundOptionsHandler.querySelector('[data-hook="bg-apply-color"]').addEventListener("click", function() {
-        const color   = backgroundOptionsHandler.querySelector('[data-hook="bg-color-picker"]').value;
-        const opacity = opacitySlider.value;
-        applyBackground("color", { color, opacity });
-    });
-
-    // Apply image
-    backgroundOptionsHandler.querySelector('[data-hook="bg-apply-image"]').addEventListener("click", function() {
-        const url  = backgroundOptionsHandler.querySelector('[data-hook="bg-image-url"]').value.trim();
-        const size = backgroundOptionsHandler.querySelector('[data-hook="bg-image-size"]').value;
-        if (!url) return;
-        applyBackground("image", { url, size });
-    });
-
-    // Restaurar configuración guardada
-    const saved = JSON.parse(localStorage.getItem("bg_config") || "null");
-    if (saved) _doApply(saved);
-}
-
-function applyBackground(type, opts = {}) {
-    const cfg = { type, ...opts };
-    localStorage.setItem("bg_config", JSON.stringify(cfg));
-    _doApply(cfg);
-}
-
-function _doApply(cfg) {
-    let css = "";
-    if (cfg.type === "color") {
-        // Convertir hex + opacity a rgba
-        const r = parseInt(cfg.color.slice(1,3), 16);
-        const g = parseInt(cfg.color.slice(3,5), 16);
-        const b = parseInt(cfg.color.slice(5,7), 16);
-        css = `body { background: rgba(${r},${g},${b},${cfg.opacity}) !important; }`;
-    } else if (cfg.type === "image") {
-        css = `body {
-            background-image: url('${cfg.url}') !important;
-            background-size: ${cfg.size} !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
-        }`;
-    } else {
-        // none — volver al default
-        css = `body { background: #1a2125 !important; }`;
-    }
-    backgroundHandler.innerHTML = css;
-}
-
-// ← NUEVO: botón en Settings que abre el panel
-function createBackgroundButton() {
-    if (getByDataHook('bgbtn')) return;
-    let btn = document.createElement("button");
-    btn.setAttribute("data-hook", "bgbtn");
-    btn.innerHTML = '🖼 Background';
-    btn.addEventListener("click", function() {
-        backgroundOptionsHandler.removeAttribute("hidden");
-    });
-    // Insertarlo después del botón de input controls
-    const inputBtn = getByDataHook('newinputbtn');
-    if (inputBtn) {
-        insertAfter(inputBtn, btn);
-    } else {
-        // fallback: agregarlo al settings dialog
-        const settingsDialog = body.querySelector('.settings-view');
-        if (settingsDialog) settingsDialog.appendChild(btn);
-    }
+    // Lo insertamos al lado del botón de "About us" o "Join"
+    insertAfter(getByDataHook('aboutbtn'), button);
+  }
 }
 
 ///////////////////////////////////////// CHAT /////////////////////////////////////////
@@ -514,21 +418,29 @@ function prefabMessage(msg) {
     const input = chatbox.querySelector('input');
     input.focus();
     input.value = msg;
+
     input.dispatchEvent(new KeyboardEvent("keydown", {
-        key: "Enter", bubbles: true, cancelable: true, keyCode: 13, which: 13,
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+        keyCode: 13,
+        which: 13,
     }));
 }
+
 
 function updatedChat() {
     const log = getByDataHook('log');
     const children = log.firstChild.children;
     const maxChildren = 5;
+
     if (lastMessage !== log.firstChild.lastChild) {
         if (children.length > maxChildren) {
             for (let i = 0; i < children.length - maxChildren; i++) {
                 children[i].style.display = "none";
             }
         }
+
         const lastChild = log.firstChild.lastChild;
         lastChild.style.opacity = 1;
         setTimeout(() => {
@@ -543,8 +455,11 @@ function updatedChat() {
 function chatToggle() {
     const chat = body.querySelector('.chatbox-view');
     const inputStyle = chat.querySelector('.input').style;
+
     inputStyle.display = inputStyle.display === 'none' ? 'block' : 'none';
-    if (inputStyle.display == 'block') chat.querySelector('input').focus();
+    if (inputStyle.display == 'block') {
+        chat.querySelector('input').focus();
+    }
 }
 
 ///////////////////////////////////////// CONTROLS /////////////////////////////////////////
@@ -568,7 +483,7 @@ function updateControlsSettingsNumbers() {
 
 function onControlsSettingsInput() {
     let inputs = inputOptionsHandler.querySelectorAll(".option-row");
-    updateControlsOptions(inputs[0].children[2].value, inputs[1].children[2].value, inputs[2].children[2].value);
+    updateControlsOptions(inputs[0].children[2].value, inputs[1].children[2].value, inputs[2].children[2].value)
 }
 
 function updateControlsOptions(w, m, o, f = false) {
@@ -578,56 +493,110 @@ function updateControlsOptions(w, m, o, f = false) {
         inputs[1].children[2].value = m;
         inputs[2].children[2].value = o;
     }
-    localStorage.setItem("controls", JSON.stringify([w, m, o]));
-    controlsHandler.innerHTML = constrolsStyleBase
-        .replace(/CONTROLS_WIDTH/g, w.toString())
-        .replace(/CONTROLS_MARGIN/g, m.toString())
-        .replace(/CONTROLS_OPACITY/g, o.toString())
-        .replace(/KICK_OPACITY/g, (o / 2).toString());
+    localStorage.setItem("controls", JSON.stringify([w, m, o]))
+    controlsHandler.innerHTML = constrolsStyleBase.replace(/CONTROLS_WIDTH/g, w.toString()).replace(/CONTROLS_MARGIN/g, m.toString()).replace(/CONTROLS_OPACITY/g, o.toString()).replace(/KICK_OPACITY/g, (o / 2).toString());
     updateControlsSettingsNumbers();
     resetJoystick();
 }
 
-function handleTouchStart(e) { isTouching = true; updateJoystick(e.touches[0]); }
-function handleTouchMove(e) { if (isTouching) updateJoystick(e.touches[0]); }
-function handleTouchEnd() { isTouching = false; resetJoystick(); }
+function handleTouchStart(e) {
+    isTouching = true;
+    updateJoystick(e.touches[0]);
+}
+
+function handleTouchMove(e) {
+    if (isTouching) {
+        updateJoystick(e.touches[0]);
+    }
+}
+
+function handleTouchEnd() {
+    isTouching = false;
+    resetJoystick();
+}
 
 function kick(str) {
-    try { gameFrame.document.dispatchEvent(new KeyboardEvent(str, { code: "KeyX" })); } catch {}
+    try {
+        gameFrame.document.dispatchEvent(new KeyboardEvent(str, { code: "KeyX" }));
+    } catch {}
 }
 
 function updateJoystick(touch) {
     const rect = joystick.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
+
     const deltaX = touch.clientX - centerX;
     const deltaY = touch.clientY - centerY;
+
     const angle = Math.atan2(deltaY, deltaX);
     const distance = Math.min(joystick.clientWidth / 2, Math.hypot(deltaX, deltaY));
+
     const thumbX = centerX + distance * Math.cos(angle);
     const thumbY = centerY + distance * Math.sin(angle);
+
     thumb.style.left = thumbX - rect.left - thumb.clientWidth / 2 + 'px';
-    thumb.style.top  = thumbY - rect.top  - thumb.clientHeight / 2 + 'px';
+    thumb.style.top = thumbY - rect.top - thumb.clientHeight / 2 + 'px';
+
     const normalizedAngle = (angle + 2 * Math.PI) % (2 * Math.PI);
-    const joystickValue = Math.round((normalizedAngle * 180 / Math.PI) / 45) % 8;
-    const dirs = ["d","sd","s","sa","a","wa","w","wd"];
-    emulateKeys(dirs[joystickValue]);
+    const angleInDegrees = (normalizedAngle * 180) / Math.PI;
+    const joystickValue = Math.round(angleInDegrees / 45) % 8;
+
+    switch (joystickValue) {
+        case 0:
+            emulateKeys("d")
+            break;
+        case 1:
+            emulateKeys("sd")
+            break;
+        case 2:
+            emulateKeys("s")
+            break;
+        case 3:
+            emulateKeys("sa")
+            break;
+        case 4:
+            emulateKeys("a")
+            break;
+        case 5:
+            emulateKeys("wa")
+            break;
+        case 6:
+            emulateKeys("w")
+            break;
+        case 7:
+            emulateKeys("wd")
+            break;
+        default:
+    }
 }
 
 function resetJoystick() {
-    thumb.style.left = joystick.clientWidth  / 2 - thumb.clientWidth  / 2 + 'px';
-    thumb.style.top  = joystick.clientHeight / 2 - thumb.clientHeight / 2 + 'px';
-    emulateKeys("");
+    const rect = joystick.getBoundingClientRect();
+    thumb.style.left = joystick.clientWidth / 2 - thumb.clientWidth / 2 + 'px';
+    thumb.style.top = joystick.clientHeight / 2 - thumb.clientHeight / 2 + 'px';
+    emulateKeys("")
 }
 
 function emulateKeys(str) {
-    let keys = { "w": "keyup", "a": "keyup", "s": "keyup", "d": "keyup" };
-    for (var i = 0; i < str.length; i++) keys[str[i]] = "keydown";
+    let keys = { "w": "keyup", "a": "keyup", "s": "keyup", "d": "keyup" }
+    for (var i = 0; i < str.length; i++) {
+        var char = str[i];
+        keys[char] = "keydown";
+    }
     try {
         gameFrame.document.dispatchEvent(new KeyboardEvent(keys['w'], { code: "KeyW" }));
         gameFrame.document.dispatchEvent(new KeyboardEvent(keys['a'], { code: "KeyA" }));
         gameFrame.document.dispatchEvent(new KeyboardEvent(keys['s'], { code: "KeyS" }));
         gameFrame.document.dispatchEvent(new KeyboardEvent(keys['d'], { code: "KeyD" }));
+    } catch {
+
+    }
+}
+
+function kick(str) {
+    try {
+        gameFrame.document.dispatchEvent(new KeyboardEvent(str, { code: "KeyX" }));
     } catch {}
 }
 
@@ -636,20 +605,19 @@ function setupControls() {
     document.head.appendChild(controlsHandler);
 
     inputOptionsHandler.setAttribute("class", "input-options");
-    inputOptionsHandler.setAttribute("hidden", "");
+    inputOptionsHandler.setAttribute("hidden", "")
     inputOptionsHandler.innerHTML = '<div class="dialog settings-view" style="height:min-content"><h1>Controls</h1><button data-hook="closeinput" style="position:absolute;top:12px;right:10px">Back</button><div class="tabcontents"><div class="section selected"><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Size</div><div style="width:45px">0</div><input class="slider" type="range" min="10" max="30" step="0.01"></div><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Margin</div><div style="width:45px">0</div><input class="slider" type="range" min="0" max="15" step="0.01"></div><div class="option-row"><div style="margin-right:10px;flex:1;min-width:60px">Opacity</div><div style="width:45px">0</div><input class="slider" type="range" min="0.2" max="1" step="0.01"></div><br><button data-hook="resetinput">Reset</button></div></div></div>';
     body.parentNode.appendChild(inputOptionsHandler);
-
     body.parentNode.querySelector('[data-hook="closeinput"]').addEventListener("click", function() {
         inputOptionsHandler.setAttribute("hidden", "");
         showControls(false);
     });
     body.parentNode.querySelector('[data-hook="resetinput"]').addEventListener("click", function() {
-        updateControlsOptions(20, 5, 1, true);
+        updateControlsOptions(20, 5, 1, true)
     });
-    inputOptionsHandler.querySelectorAll(".option-row")[0].children[2].addEventListener("input", onControlsSettingsInput);
-    inputOptionsHandler.querySelectorAll(".option-row")[1].children[2].addEventListener("input", onControlsSettingsInput);
-    inputOptionsHandler.querySelectorAll(".option-row")[2].children[2].addEventListener("input", onControlsSettingsInput);
+    inputOptionsHandler.querySelectorAll(".option-row")[0].children[2].addEventListener("input", onControlsSettingsInput)
+    inputOptionsHandler.querySelectorAll(".option-row")[1].children[2].addEventListener("input", onControlsSettingsInput)
+    inputOptionsHandler.querySelectorAll(".option-row")[2].children[2].addEventListener("input", onControlsSettingsInput)
 
     joystick = document.createElement("div");
     joystick.setAttribute("class", "neo rounded sizer");
@@ -667,77 +635,113 @@ function setupControls() {
     kickButton.setAttribute("float", "");
     kickButton.setAttribute("id", "kick");
     kickButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M290 49c-16 0-32 14-38 36-6 25 5 48 22 52 18 5 39-10 45-35 7-25-5-48-22-52l-7-1zM89 68 78 87c32 16 63 34 96 47l28-12c-40-16-77-34-113-54zm148 56c-48 26-98 42-154 62l9 16c52-16 111-33 161-56-7-6-12-13-16-22zm30 35c-22 11-46 20-71 29-20 45-28 95-37 140l-2 11-101-40-16 26 130 60 3-4 15-29a1672 1672 0 0 0 79-193zm-31 135-17 36c25 37 57 79 95 109l23-17c-36-40-73-85-101-128zm188 73a48 48 0 0 0-48 48 48 48 0 0 0 48 48 48 48 0 0 0 48-48 48 48 0 0 0-48-48z"/></svg>';
-    kickButton.addEventListener('touchstart', function() { kick('keydown'); });
-    kickButton.addEventListener('touchend',   function() { kick('keyup');   });
+    kickButton.addEventListener('touchstart', function() { kick('keydown') });
+    kickButton.addEventListener('touchend', function() { kick('keyup') });
 
     document.body.appendChild(joystick);
     document.body.appendChild(kickButton);
 
     const controlOptions = JSON.parse(localStorage.getItem("controls"));
     if (controlOptions === null) {
-        updateControlsOptions(20, 5, 1, true);
+        updateControlsOptions(20, 5, 1, true)
     } else {
-        updateControlsOptions(controlOptions[0], controlOptions[1], controlOptions[2], true);
+        updateControlsOptions(controlOptions[0], controlOptions[1], controlOptions[2], true)
     }
+
     resetJoystick();
 }
 
-///////////////////////////////////////// GAMEPAD /////////////////////////////////////////
+
+
+
+
+
+
+
+
 
 let previousDigitalStickState = "";
 let previousAnalogStickState = "";
 let isXButtonPressed = false;
 
 window.addEventListener("gamepadconnected", (event) => {
-    console.log("Gamepad connected:", event.gamepad);
-    checkGamepadState(event.gamepad);
+  console.log("Gamepad connected:", event.gamepad);
+  checkGamepadState(event.gamepad);
 });
+
 window.addEventListener("gamepaddisconnected", (event) => {
-    console.log("Gamepad disconnected:", event.gamepad);
+  console.log("Gamepad disconnected:", event.gamepad);
 });
 
 function checkGamepadState(gamepad) {
-    requestAnimationFrame(() => {
-        const axes   = gamepad.axes;
-        const buttons = gamepad.buttons;
-        const dState = getDigitalStickState(axes[0], axes[1]);
-        if (dState.changed) { emulateKeys(dState.direction); previousDigitalStickState = dState.direction; }
-        const aState = getAnalogStickState(axes[2], axes[3]);
-        if (aState.changed) { emulateKeys(aState.direction); previousAnalogStickState = aState.direction; }
-        if ((buttons[0].pressed || buttons[2].pressed) && !isXButtonPressed) {
-            kick("keydown"); isXButtonPressed = true;
-        } else if (!buttons[0].pressed && !buttons[2].pressed) {
-            kick("keyup"); isXButtonPressed = false;
-        }
-        checkGamepadState(navigator.getGamepads()[gamepad.index]);
-    });
+  requestAnimationFrame(() => {
+    const axes = gamepad.axes;
+    const buttons = gamepad.buttons;
+
+    // Check the digital stick (assuming 8 positions)
+    const digitalStickState = getDigitalStickState(axes[0], axes[1]);
+    if (digitalStickState.changed) {
+      emulateKeys(digitalStickState.direction);
+      previousDigitalStickState = digitalStickState.direction;
+    }
+
+    // Check the analog stick (assuming 2 positions)
+    const analogStickState = getAnalogStickState(axes[2], axes[3]);
+    if (analogStickState.changed) {
+      emulateKeys(analogStickState.direction);
+      previousAnalogStickState = analogStickState.direction;
+    }
+
+    // Check if the X button is pressed
+    if ((buttons[0].pressed || buttons[2].pressed) && !isXButtonPressed) {
+      kick("keydown");
+      isXButtonPressed = true;
+    } else if (!buttons[0].pressed && !buttons[2].pressed) {
+      kick("keyup");
+      isXButtonPressed = false;
+    }
+
+    // Recursively check for changes
+    checkGamepadState(navigator.getGamepads()[gamepad.index]);
+  });
 }
 
 function getDigitalStickState(x, y) {
-    const threshold = 0.5, center = 0.1;
-    if (Math.abs(x) < center && Math.abs(y) < center)
-        return { changed: previousDigitalStickState !== "Center", direction: "Center" };
-    if (Math.abs(x) > threshold || Math.abs(y) > threshold) {
-        const direction = getDirection(x, y);
-        return { changed: direction !== previousDigitalStickState, direction };
-    }
-    return { changed: false };
+  const threshold = 0.5;
+  const centerThreshold = 0.1; // Adjust this threshold for center detection
+
+  if (Math.abs(x) < centerThreshold && Math.abs(y) < centerThreshold) {
+    return { changed: previousDigitalStickState !== "Center", direction: "Center" };
+  }
+
+  if (Math.abs(x) > threshold || Math.abs(y) > threshold) {
+    const direction = getDirection(x, y);
+    return { changed: direction !== previousDigitalStickState, direction };
+  }
+
+  return { changed: false };
 }
 
 function getAnalogStickState(x, y) {
-    const threshold = 0.5, center = 0.1;
-    if (Math.abs(x) < center && Math.abs(y) < center)
-        return { changed: previousAnalogStickState !== "Center", direction: "Center" };
-    if (Math.abs(x) > threshold || Math.abs(y) > threshold) {
-        const direction = getDirection(x, y);
-        return { changed: direction !== previousAnalogStickState, direction };
-    }
-    return { changed: false };
+  const threshold = 0.5;
+  const centerThreshold = 0.1; // Adjust this threshold for center detection
+
+  if (Math.abs(x) < centerThreshold && Math.abs(y) < centerThreshold) {
+    return { changed: previousAnalogStickState !== "Center", direction: "Center" };
+  }
+
+  if (Math.abs(x) > threshold || Math.abs(y) > threshold) {
+    const direction = getDirection(x, y);
+    return { changed: direction !== previousAnalogStickState, direction };
+  }
+
+  return { changed: false };
 }
 
 function getDirection(x, y) {
-    const angle = Math.atan2(y, x);
-    const deg   = (angle >= 0 ? angle : (2 * Math.PI + angle)) * (180 / Math.PI);
-    const sector = Math.round(deg / 45) % 8;
-    return ["d","sd","s","sa","a","aw","w","wd"][sector];
+  const angle = Math.atan2(y, x);
+  const angleInDegrees = (angle >= 0 ? angle : (2 * Math.PI + angle)) * (180 / Math.PI);
+  const sector = Math.round(angleInDegrees / 45) % 8;
+  const directions = ["d", "sd", "s", "sa", "a", "aw", "w", "wd"];
+  return directions[sector];
 }
