@@ -10,7 +10,7 @@ if(!localStorage.getItem('low_latency_canvas') || localStorage.getItem('low_late
 let gameFrame = document.querySelector('.gameframe').contentWindow;
 let body;
 
-const tips = ["Haxball Mobile Mod V1"];
+const tips = ["HAXBALL MOBILE MOD!!!"];
 
 const constrolsStyleBase = "#joystick,#kick{z-index:100;bottom:CONTROLS_MARGINvw}.neo{opacity:CONTROLS_OPACITY;background-color:#c2c2c255;box-shadow:6px 6px 10px 0 #a5abb133,-5px -5px 9px 0 #a5abb133;color:#dedede55;font-weight:bolder;font-size:0.1rem}.sizer{width:CONTROLS_WIDTH%;aspect-ratio:1/1;}#joystick{left:CONTROLS_MARGIN%;overflow:visible}#thumb{width:40%;height:40%;background-color:#ecf0f3cc}#kick{right:CONTROLS_MARGIN%}button.neo:active{opacity:KICK_OPACITY}";
 
