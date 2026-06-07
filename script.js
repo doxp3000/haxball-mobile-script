@@ -1,4 +1,4 @@
-document.head.appendChild(Object.assign(document.createElement("style"), { innerHTML: "#thumb,body{touch-action:none}body{user-select:none;height:100%}@media only screen and (max-device-width:480px){body{touch-action:manipulation}}.header,.rightbar{display:none!important}.rounded{border:none;border-radius:50%}[view|=hidden]{display:none}[view|=visible]{display:flex;justify-content:center;align-items:center}[float]{position:absolute}svg{fill:#ecf0f3cc;width:30px;height:auto}#kick svg{width:50%}" }));
+document.head.appendChild(Object.assign(document.createElement("style"), { innerHTML: "#thumb,body{touch-action:none}body{user-select:none;height:100%}@media only screen and (max-device-width:480px){body{touch-action:manipulation}}.header,.rightbar{display:none!important}.rounded{border:none;border-radius:50%}[view|=hidden]{display:none}[view|=visible]{display:flex;justify-content:center;align-items:center}[float]{position:absolute}svg{fill:#ecf0f3cc;width:30px;height:auto}#kick svg{width:50%}#turbo svg{width:50%}" }));
 document.querySelector('.gameframe').contentWindow.document.head.appendChild(Object.assign(document.createElement("style"), { innerHTML: ".room-view,.roomlist-view{height:100%;margin-top:0}.game-view>.top-section,.room-view{margin-top:0}.settings-view{width:100%;max-height:none}.game-view>[data-hook=popups]{background-color:#1a212585}.disconnected-view .dialog,.disconnected-view .room-view>.container{width:450px}.create-room-view>.dialog,.room-view.create-room-view>.container{max-width:450px;width:100%}body{background:#111417}[data-hook=leave-btn]{background:#c13535!important}.file-btn,[data-hook=rec-btn]{display:none!important}h1{text-align:center}.room-view>.container>.header-btns{bottom:0;right:10px;top:auto}.room-view>.container{max-width:none;max-height:max-content}.room-view{position:absolute;width:100%}.roomlist-view>.dialog{max-width:max-content;max-height:max-content;background:#111417;border:1px solid #2a2f35}.game-state-view .bar>.scoreboard{display:flex;align-items:center;margin-right:50px}.chatbox-view{position:absolute;left:10px;margin:0;top:5px;width:10%;pointer-events:none;font-size:0.5rem;display:contents}.chatbox-view-contents{flex-direction:column-reverse;background:0 0;pointer-events:none}.chatbox-view-contents>.input{margin-bottom:10px;pointer-events:auto}.chatbox-view-contents>.log{flex-direction:column;pointer-events:none;overflow-y:scroll;scrollbar-width:none}.settings-view .section.selected{display:flex;align-items:center}.log-contents{display:flex;flex-direction:column-reverse;text-shadow:1px 1px 5px #000000cc}.fade-out{opacity:0;transition:opacity 10s ease-out}thead tr{display:table-row!important}svg{width:1em}.input-options{position:absolute;width:100%;height:100%;z-index:20;background-color:#111417}.roomlist-view table{width:100%;border-collapse:collapse}.roomlist-view thead tr{background:#1a1f24;color:#8a9bb0;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px}.roomlist-view tbody tr{border-bottom:1px solid #1e2329;transition:background 0.15s}.roomlist-view tbody tr:hover{background:#1a1f24}.roomlist-view .dialog h1{font-size:1.1rem;color:#fff;padding:14px 16px 0;margin:0}.roomlist-view .dialog>p{color:#8a9bb0;font-size:0.8rem;padding:2px 16px 10px;margin:0}.roomlist-view .filters{padding:6px 16px;background:#0f1215;border-bottom:1px solid #1e2329}.roomlist-view .buttons{padding:10px 16px;background:#0f1215;border-top:1px solid #1e2329;gap:6px}.roomlist-view .buttons button{background:#1e2329;border:1px solid #2a3040;color:#cdd6e0;font-size:0.78rem;padding:6px 12px;border-radius:6px}.roomlist-view .buttons button:hover{background:#2a3040}.roomlist-view [data-hook=listscroll]{background:#111417}" }));
 
 if(!localStorage.getItem('low_latency_canvas') || localStorage.getItem('low_latency_canvas') == 1){
@@ -10,9 +10,9 @@ if(!localStorage.getItem('low_latency_canvas') || localStorage.getItem('low_late
 let gameFrame = document.querySelector('.gameframe').contentWindow;
 let body;
 
-const tips = ["HAXBALL MOBILE MOD!!!"];
+const tips = ["Haxball Mobile Mod V1"];
 
-const constrolsStyleBase = "#joystick,#kick{z-index:100;bottom:CONTROLS_MARGINvw}.neo{opacity:CONTROLS_OPACITY;background-color:#c2c2c255;box-shadow:6px 6px 10px 0 #a5abb133,-5px -5px 9px 0 #a5abb133;color:#dedede55;font-weight:bolder;font-size:0.1rem}.sizer{width:CONTROLS_WIDTH%;aspect-ratio:1/1;}#joystick{left:CONTROLS_MARGIN%;overflow:visible}#thumb{width:40%;height:40%;background-color:#ecf0f3cc}#kick{right:CONTROLS_MARGIN%}button.neo:active{opacity:KICK_OPACITY}";
+const constrolsStyleBase = "#joystick,#kick,#turbo{z-index:100}#kick,#turbo{right:CONTROLS_MARGIN%}#kick{bottom:CONTROLS_MARGINvw}#turbo{bottom:calc(CONTROLS_MARGINvw + CONTROLS_WIDTHvw + 8px)}.neo{opacity:CONTROLS_OPACITY;background-color:#c2c2c255;box-shadow:6px 6px 10px 0 #a5abb133,-5px -5px 9px 0 #a5abb133;color:#dedede55;font-weight:bolder;font-size:0.1rem}.sizer{width:CONTROLS_WIDTH%;aspect-ratio:1/1;}#joystick{left:CONTROLS_MARGIN%;bottom:CONTROLS_MARGINvw;overflow:visible}#thumb{width:40%;height:40%;background-color:#ecf0f3cc}button.neo:active{opacity:KICK_OPACITY}#turbo.neo{background-color:#c2350055}";
 
 const countryFilterHandler = document.createElement('style');
 const hideButtons = document.createElement('style');
@@ -34,6 +34,9 @@ let canResetJoystick = true;
 let lastMessage;
 let joystick;
 let kickButton;
+let turboButton;
+let turboInterval = null;
+const TURBO_RATE = 80;
 
 ///////////////////////////////////////// FPS COUNTER /////////////////////////////////////////
 let fpsCounter = null;
@@ -384,8 +387,6 @@ function setupModsOptions() {
             <button data-hook="closemods" style="position:absolute;top:12px;right:10px">Back</button>
             <div class="tabcontents">
                 <div class="section selected" style="flex-direction:column;gap:10px;padding:12px">
-
-                    <!-- FPS -->
                     <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
                         <div>
                             <div style="font-weight:bold;font-size:0.9rem">FPS Counter</div>
@@ -393,8 +394,6 @@ function setupModsOptions() {
                         </div>
                         <button data-hook="fps-toggle-btn" style="min-width:70px;background:${localStorage.getItem('fps_enabled')==='1'?'#43b581':'#2a3040'}">${localStorage.getItem('fps_enabled')==='1'?'ON':'OFF'}</button>
                     </div>
-
-                    <!-- Background -->
                     <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
                         <div>
                             <div style="font-weight:bold;font-size:0.9rem">Background</div>
@@ -402,7 +401,16 @@ function setupModsOptions() {
                         </div>
                         <button data-hook="bg-open-btn" style="min-width:70px;background:#2a3040">Edit</button>
                     </div>
-
+                    <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
+                        <div>
+                            <div style="font-weight:bold;font-size:0.9rem">Turbo Rate</div>
+                            <div style="color:#8a9bb0;font-size:0.75rem">Speed of turbo kick (ms)</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <div data-hook="turbo-rate-val" style="width:35px;text-align:center;font-size:0.85rem">80</div>
+                            <input data-hook="turbo-rate-slider" class="slider" type="range" min="30" max="200" step="10" value="80" style="width:80px">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -424,6 +432,15 @@ function setupModsOptions() {
     modsOptionsHandler.querySelector('[data-hook="bg-open-btn"]').addEventListener("click", function() {
         backgroundOptionsHandler.removeAttribute("hidden");
     });
+
+    const turboSlider = modsOptionsHandler.querySelector('[data-hook="turbo-rate-slider"]');
+    const turboVal    = modsOptionsHandler.querySelector('[data-hook="turbo-rate-val"]');
+    const savedRate   = localStorage.getItem("turbo_rate");
+    if (savedRate) { turboSlider.value = savedRate; turboVal.innerHTML = savedRate; }
+    turboSlider.addEventListener("input", function() {
+        turboVal.innerHTML = this.value;
+        localStorage.setItem("turbo_rate", this.value);
+    });
 }
 
 function createModsButton() {
@@ -432,7 +449,6 @@ function createModsButton() {
     btn.setAttribute("data-hook", "modsbtn");
     btn.innerHTML = 'Mod Options';
     btn.addEventListener("click", function() {
-        // Sincronizar estado del boton FPS al abrir
         const fpsBtn = modsOptionsHandler.querySelector('[data-hook="fps-toggle-btn"]');
         if (fpsBtn) {
             fpsBtn.innerHTML = fpsActive ? "ON" : "OFF";
@@ -517,7 +533,7 @@ function setupBackground() {
 
     tabs.color.addEventListener("click", () => setTab("color"));
     tabs.image.addEventListener("click", () => setTab("image"));
-    tabs.none.addEventListener("click", () => { setTab("none"); applyBackground("none"); });
+    tabs.none.addEventListener("click",  () => { setTab("none"); applyBackground("none"); });
 
     const opacitySlider = backgroundOptionsHandler.querySelector('[data-hook="bg-opacity-slider"]');
     const opacityVal    = backgroundOptionsHandler.querySelector('[data-hook="bg-opacity-val"]');
@@ -596,8 +612,15 @@ function chatToggle() {
 
 ///////////////////////////////////////// CONTROLS /////////////////////////////////////////
 function showControls(v) {
-    if (v) { joystick.setAttribute("view", "visible"); kickButton.setAttribute("view", "visible"); }
-    else   { joystick.setAttribute("view", "hidden");  kickButton.setAttribute("view", "hidden");  }
+    if (v) {
+        joystick.setAttribute("view", "visible");
+        kickButton.setAttribute("view", "visible");
+        turboButton.setAttribute("view", "visible");
+    } else {
+        joystick.setAttribute("view", "hidden");
+        kickButton.setAttribute("view", "hidden");
+        turboButton.setAttribute("view", "hidden");
+    }
 }
 
 function updateControlsSettingsNumbers() {
@@ -688,6 +711,7 @@ function setupControls() {
     inputOptionsHandler.querySelectorAll(".option-row")[1].children[2].addEventListener("input", onControlsSettingsInput);
     inputOptionsHandler.querySelectorAll(".option-row")[2].children[2].addEventListener("input", onControlsSettingsInput);
 
+    // Joystick
     joystick = document.createElement("div");
     joystick.setAttribute("class", "neo rounded sizer");
     joystick.setAttribute("view", "hidden");
@@ -698,17 +722,41 @@ function setupControls() {
     joystick.addEventListener('touchmove', handleTouchMove);
     joystick.addEventListener('touchend', handleTouchEnd);
 
+    // Kick normal
     kickButton = document.createElement("button");
     kickButton.setAttribute("class", "neo rounded sizer");
     kickButton.setAttribute("view", "hidden");
     kickButton.setAttribute("float", "");
     kickButton.setAttribute("id", "kick");
     kickButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M290 49c-16 0-32 14-38 36-6 25 5 48 22 52 18 5 39-10 45-35 7-25-5-48-22-52l-7-1zM89 68 78 87c32 16 63 34 96 47l28-12c-40-16-77-34-113-54zm148 56c-48 26-98 42-154 62l9 16c52-16 111-33 161-56-7-6-12-13-16-22zm30 35c-22 11-46 20-71 29-20 45-28 95-37 140l-2 11-101-40-16 26 130 60 3-4 15-29a1672 1672 0 0 0 79-193zm-31 135-17 36c25 37 57 79 95 109l23-17c-36-40-73-85-101-128zm188 73a48 48 0 0 0-48 48 48 48 0 0 0 48 48 48 48 0 0 0 48-48 48 48 0 0 0-48-48z"/></svg>';
-    kickButton.addEventListener('touchstart', function() { kick('keydown'); });
-    kickButton.addEventListener('touchend',   function() { kick('keyup');   });
+    kickButton.addEventListener('touchstart', function(e) { e.preventDefault(); kick('keydown'); });
+    kickButton.addEventListener('touchend',   function(e) { e.preventDefault(); kick('keyup'); });
+
+    // Turbo
+    turboButton = document.createElement("button");
+    turboButton.setAttribute("class", "neo rounded sizer");
+    turboButton.setAttribute("view", "hidden");
+    turboButton.setAttribute("float", "");
+    turboButton.setAttribute("id", "turbo");
+    turboButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>';
+    turboButton.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        kick('keydown');
+        const rate = parseInt(localStorage.getItem("turbo_rate") || "80");
+        turboInterval = setInterval(function() {
+            kick('keyup');
+            setTimeout(function() { kick('keydown'); }, 20);
+        }, rate);
+    });
+    turboButton.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        kick('keyup');
+        if (turboInterval) { clearInterval(turboInterval); turboInterval = null; }
+    });
 
     document.body.appendChild(joystick);
     document.body.appendChild(kickButton);
+    document.body.appendChild(turboButton);
 
     const controlOptions = JSON.parse(localStorage.getItem("controls"));
     if (controlOptions === null) { updateControlsOptions(20, 5, 1, true); }
