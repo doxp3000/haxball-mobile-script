@@ -10,7 +10,9 @@ if(!localStorage.getItem('low_latency_canvas') || localStorage.getItem('low_late
 let gameFrame = document.querySelector('.gameframe').contentWindow;
 let body;
 
-const tips = ["Haxball Mobile Mod V1"];
+const MOD_VERSION = "1.2";
+
+const tips = ["Haxball Mobile Mod V" + MOD_VERSION];
 
 const constrolsStyleBase = "#joystick,#kick,#turbo{z-index:100}#kick,#turbo{right:CONTROLS_MARGIN%}#kick{bottom:CONTROLS_MARGINvw}#turbo{bottom:calc(CONTROLS_MARGINvw + CONTROLS_WIDTHvw + 8px)}.neo{opacity:CONTROLS_OPACITY;background-color:#c2c2c255;box-shadow:6px 6px 10px 0 #a5abb133,-5px -5px 9px 0 #a5abb133;color:#dedede55;font-weight:bolder;font-size:0.1rem}.sizer{width:CONTROLS_WIDTH%;aspect-ratio:1/1;}#joystick{left:CONTROLS_MARGIN%;bottom:CONTROLS_MARGINvw;overflow:visible}#thumb{width:40%;height:40%;background-color:#ecf0f3cc}button.neo:active{opacity:KICK_OPACITY}#turbo.neo{background-color:#c2350055}";
 
@@ -26,6 +28,7 @@ const aboutHandler = document.createElement("div");
 const inputOptionsHandler = document.createElement("div");
 const backgroundOptionsHandler = document.createElement("div");
 const modsOptionsHandler = document.createElement("div");
+const changelogHandler = document.createElement("div");
 const config = { childList: true, subtree: true };
 
 ///////////////////////////////////////// VARIABLES /////////////////////////////////////////
@@ -36,7 +39,6 @@ let joystick;
 let kickButton;
 let turboButton;
 let turboInterval = null;
-const TURBO_RATE = 80;
 
 ///////////////////////////////////////// FPS COUNTER /////////////////////////////////////////
 let fpsCounter = null;
@@ -84,6 +86,58 @@ function toggleFPS(active) {
     }
 }
 
+///////////////////////////////////////// CHANGELOG /////////////////////////////////////////
+function setupChangelog() {
+    changelogHandler.style.cssText = "position:absolute;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:50;display:none;justify-content:center;align-items:center;";
+    changelogHandler.innerHTML = `
+        <div style="background:#111417;border:1px solid #2a3040;border-radius:12px;max-width:380px;width:90%;padding:0;overflow:hidden;">
+            <div style="background:linear-gradient(135deg,#1a1f24,#0f1215);padding:16px 20px;border-bottom:1px solid #2a3040;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <div style="font-size:1.1rem;font-weight:bold;color:#fff;">Haxball Mobile Mod</div>
+                        <div style="font-size:0.75rem;color:#43b581;">Version ${MOD_VERSION} — What's new</div>
+                    </div>
+                    <div style="background:#43b581;color:#fff;font-size:0.7rem;font-weight:bold;padding:3px 8px;border-radius:20px;">NEW</div>
+                </div>
+            </div>
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
+                ${[
+                    ["FPS Counter", "Overlay activable desde Mod Options. Verde, amarillo o rojo según rendimiento."],
+                    ["Mod Options", "Nuevo submenú en Settings que agrupa todas las opciones del mod."],
+                    ["Background", "Cambiá el fondo del juego por un color custom o una imagen via URL."],
+                    ["Turbo Kick", "Botón extra arriba del disparo que dispara automáticamente al mantener. Velocidad ajustable."],
+                    ["Camera Zoom", "Slider para ajustar el nivel de zoom de la cámara desde Mod Options."],
+                    ["Roomlist", "Nuevo diseño oscuro y más limpio de la lista de salas."],
+                ].map(([title, desc]) => `
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        <div style="width:6px;height:6px;border-radius:50%;background:#43b581;margin-top:5px;flex-shrink:0;"></div>
+                        <div>
+                            <div style="font-size:0.85rem;font-weight:bold;color:#cdd6e0;">${title}</div>
+                            <div style="font-size:0.75rem;color:#8a9bb0;">${desc}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div style="padding:12px 20px;border-top:1px solid #2a3040;">
+                <button data-hook="closelog" style="width:100%;background:#43b581;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:0.9rem;">Got it!</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(changelogHandler);
+    changelogHandler.querySelector('[data-hook="closelog"]').addEventListener("click", function() {
+        changelogHandler.style.display = "none";
+        localStorage.setItem("last_seen_version", MOD_VERSION);
+    });
+}
+
+function showChangelogIfNew() {
+    const lastSeen = localStorage.getItem("last_seen_version");
+    if (lastSeen !== MOD_VERSION) {
+        changelogHandler.style.display = "flex";
+    }
+}
+
 ///////////////////////////////////////// MAIN /////////////////////////////////////////
 var checkLoaderInterval = setInterval(checkLoader, 1000);
 
@@ -105,6 +159,7 @@ function init() {
     setupBackground();
     setupFPS();
     setupModsOptions();
+    setupChangelog();
     setupCopyright(true);
     hideButtons.remove();
 
@@ -122,7 +177,6 @@ function init() {
 
     body.parentNode.appendChild(aboutHandler);
     if (localStorage.getItem("firstTime") === null) {
-        aboutHandler.style.display = 'flex';
         localStorage.setItem("firstTime", true);
         localStorage.setItem("view_mode", 1);
         localStorage.setItem("resolution_scale", 0.75);
@@ -131,6 +185,7 @@ function init() {
         aboutHandler.style.display = 'none';
     });
 
+    showChangelogIfNew();
     console.log("PAGE_LOADED");
 }
 
@@ -172,8 +227,8 @@ function setupCountryFilter() {
 
 function setupCopyright() {
     copyrightHandler.setAttribute("data-hook", "copyright");
-    copyrightHandler.setAttribute("style", "text-align:center;position:absolute;bottom:15px;width:100%;display:block");
-    copyrightHandler.innerHTML = 'HaxBall Mod';
+    copyrightHandler.setAttribute("style", "text-align:center;position:absolute;bottom:15px;width:100%;display:block;color:#8a9bb0;font-size:0.7rem;");
+    copyrightHandler.innerHTML = 'HaxBall Mobile Mod v' + MOD_VERSION;
     document.body.appendChild(copyrightHandler);
 }
 
@@ -381,19 +436,28 @@ function setupModsOptions() {
     modsOptionsHandler.setAttribute("class", "input-options");
     modsOptionsHandler.setAttribute("hidden", "");
     modsOptionsHandler.style.zIndex = "25";
+
+    const savedZoom  = localStorage.getItem("resolution_scale") || "1.0";
+    const savedRate  = localStorage.getItem("turbo_rate") || "80";
+    const fpsOn      = localStorage.getItem("fps_enabled") === "1";
+
     modsOptionsHandler.innerHTML = `
-        <div class="dialog settings-view" style="height:min-content;max-width:420px;margin:auto;position:relative;top:50%;transform:translateY(-50%)">
+        <div class="dialog settings-view" style="height:min-content;max-width:420px;width:95%;margin:auto;position:relative;top:50%;transform:translateY(-50%);overflow-y:auto;max-height:90vh;">
             <h1>Mod Options</h1>
             <button data-hook="closemods" style="position:absolute;top:12px;right:10px">Back</button>
             <div class="tabcontents">
                 <div class="section selected" style="flex-direction:column;gap:10px;padding:12px">
+
+                    <!-- FPS -->
                     <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
                         <div>
                             <div style="font-weight:bold;font-size:0.9rem">FPS Counter</div>
                             <div style="color:#8a9bb0;font-size:0.75rem">Show frames per second overlay</div>
                         </div>
-                        <button data-hook="fps-toggle-btn" style="min-width:70px;background:${localStorage.getItem('fps_enabled')==='1'?'#43b581':'#2a3040'}">${localStorage.getItem('fps_enabled')==='1'?'ON':'OFF'}</button>
+                        <button data-hook="fps-toggle-btn" style="min-width:70px;background:${fpsOn?'#43b581':'#2a3040'}">${fpsOn?'ON':'OFF'}</button>
                     </div>
+
+                    <!-- Background -->
                     <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
                         <div>
                             <div style="font-weight:bold;font-size:0.9rem">Background</div>
@@ -401,16 +465,37 @@ function setupModsOptions() {
                         </div>
                         <button data-hook="bg-open-btn" style="min-width:70px;background:#2a3040">Edit</button>
                     </div>
+
+                    <!-- Turbo Rate -->
                     <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
                         <div>
                             <div style="font-weight:bold;font-size:0.9rem">Turbo Rate</div>
                             <div style="color:#8a9bb0;font-size:0.75rem">Speed of turbo kick (ms)</div>
                         </div>
                         <div style="display:flex;align-items:center;gap:8px">
-                            <div data-hook="turbo-rate-val" style="width:35px;text-align:center;font-size:0.85rem">80</div>
-                            <input data-hook="turbo-rate-slider" class="slider" type="range" min="30" max="200" step="10" value="80" style="width:80px">
+                            <div data-hook="turbo-rate-val" style="width:35px;text-align:center;font-size:0.85rem">${savedRate}</div>
+                            <input data-hook="turbo-rate-slider" class="slider" type="range" min="30" max="200" step="10" value="${savedRate}" style="width:80px">
                         </div>
                     </div>
+
+                    <!-- Camera Zoom -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
+                        <div>
+                            <div style="font-weight:bold;font-size:0.9rem">Camera Zoom</div>
+                            <div style="color:#8a9bb0;font-size:0.75rem">Needs reload to apply</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <div data-hook="zoom-val" style="width:35px;text-align:center;font-size:0.85rem">${parseFloat(savedZoom).toFixed(2)}</div>
+                            <input data-hook="zoom-slider" class="slider" type="range" min="0.5" max="2.0" step="0.05" value="${savedZoom}" style="width:80px">
+                        </div>
+                    </div>
+
+                    <!-- Apply zoom button -->
+                    <button data-hook="zoom-apply-btn" style="width:100%;background:#2a3040;border-radius:8px;padding:10px;font-size:0.85rem;">Apply Zoom & Reload</button>
+
+                    <!-- Changelog -->
+                    <button data-hook="changelog-btn" style="width:100%;background:#1a1f24;border:1px solid #2a3040;border-radius:8px;padding:10px;font-size:0.85rem;color:#8a9bb0;">View changelog v${MOD_VERSION}</button>
+
                 </div>
             </div>
         </div>
@@ -435,11 +520,29 @@ function setupModsOptions() {
 
     const turboSlider = modsOptionsHandler.querySelector('[data-hook="turbo-rate-slider"]');
     const turboVal    = modsOptionsHandler.querySelector('[data-hook="turbo-rate-val"]');
-    const savedRate   = localStorage.getItem("turbo_rate");
-    if (savedRate) { turboSlider.value = savedRate; turboVal.innerHTML = savedRate; }
     turboSlider.addEventListener("input", function() {
         turboVal.innerHTML = this.value;
         localStorage.setItem("turbo_rate", this.value);
+    });
+
+    const zoomSlider = modsOptionsHandler.querySelector('[data-hook="zoom-slider"]');
+    const zoomVal    = modsOptionsHandler.querySelector('[data-hook="zoom-val"]');
+    zoomSlider.addEventListener("input", function() {
+        const val = parseFloat(this.value).toFixed(2);
+        zoomVal.innerHTML = val;
+        localStorage.setItem("resolution_scale", val);
+        try { gameFrame.localStorage.setItem("resolution_scale", val); } catch {}
+    });
+
+    modsOptionsHandler.querySelector('[data-hook="zoom-apply-btn"]').addEventListener("click", function() {
+        const val = parseFloat(zoomSlider.value).toFixed(2);
+        localStorage.setItem("resolution_scale", val);
+        try { gameFrame.localStorage.setItem("resolution_scale", val); } catch {}
+        location.reload();
+    });
+
+    modsOptionsHandler.querySelector('[data-hook="changelog-btn"]').addEventListener("click", function() {
+        changelogHandler.style.display = "flex";
     });
 }
 
@@ -711,7 +814,6 @@ function setupControls() {
     inputOptionsHandler.querySelectorAll(".option-row")[1].children[2].addEventListener("input", onControlsSettingsInput);
     inputOptionsHandler.querySelectorAll(".option-row")[2].children[2].addEventListener("input", onControlsSettingsInput);
 
-    // Joystick
     joystick = document.createElement("div");
     joystick.setAttribute("class", "neo rounded sizer");
     joystick.setAttribute("view", "hidden");
@@ -722,7 +824,6 @@ function setupControls() {
     joystick.addEventListener('touchmove', handleTouchMove);
     joystick.addEventListener('touchend', handleTouchEnd);
 
-    // Kick normal
     kickButton = document.createElement("button");
     kickButton.setAttribute("class", "neo rounded sizer");
     kickButton.setAttribute("view", "hidden");
@@ -732,7 +833,6 @@ function setupControls() {
     kickButton.addEventListener('touchstart', function(e) { e.preventDefault(); kick('keydown'); });
     kickButton.addEventListener('touchend',   function(e) { e.preventDefault(); kick('keyup'); });
 
-    // Turbo
     turboButton = document.createElement("button");
     turboButton.setAttribute("class", "neo rounded sizer");
     turboButton.setAttribute("view", "hidden");
