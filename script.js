@@ -10,8 +10,9 @@ if(!localStorage.getItem('low_latency_canvas') || localStorage.getItem('low_late
 let gameFrame = document.querySelector('.gameframe').contentWindow;
 let body;
 
-const MOD_VERSION = "1.3";
-const tips = ["Haxball Mobile Mod v" + MOD_VERSION];
+const MOD_VERSION = "1.2";
+
+const tips = ["Haxball Mobile Mod V" + MOD_VERSION];
 
 const constrolsStyleBase = "#joystick,#kick,#turbo{z-index:100}#kick,#turbo{right:CONTROLS_MARGIN%}#kick{bottom:CONTROLS_MARGINvw}#turbo{bottom:calc(CONTROLS_MARGINvw + CONTROLS_WIDTHvw + 8px)}.neo{opacity:CONTROLS_OPACITY;background-color:#c2c2c255;box-shadow:6px 6px 10px 0 #a5abb133,-5px -5px 9px 0 #a5abb133;color:#dedede55;font-weight:bolder;font-size:0.1rem}.sizer{width:CONTROLS_WIDTH%;aspect-ratio:1/1;}#joystick{left:CONTROLS_MARGIN%;bottom:CONTROLS_MARGINvw;overflow:visible}#thumb{width:40%;height:40%;background-color:#ecf0f3cc}button.neo:active{opacity:KICK_OPACITY}#turbo.neo{background-color:#c2350055}";
 
@@ -28,7 +29,6 @@ const inputOptionsHandler = document.createElement("div");
 const backgroundOptionsHandler = document.createElement("div");
 const modsOptionsHandler = document.createElement("div");
 const changelogHandler = document.createElement("div");
-const favoritesHandler = document.createElement("div");
 const config = { childList: true, subtree: true };
 
 ///////////////////////////////////////// VARIABLES /////////////////////////////////////////
@@ -39,9 +39,8 @@ let joystick;
 let kickButton;
 let turboButton;
 let turboInterval = null;
-let currentRoomlistTab = "rooms";
 
-///////////////////////////////////////// FPS /////////////////////////////////////////
+///////////////////////////////////////// FPS COUNTER /////////////////////////////////////////
 let fpsCounter = null;
 let fpsActive = false;
 let fpsFrames = 0;
@@ -87,195 +86,6 @@ function toggleFPS(active) {
     }
 }
 
-///////////////////////////////////////// FAVORITES /////////////////////////////////////////
-function getFavorites() {
-    return JSON.parse(localStorage.getItem("fav_rooms") || "[]");
-}
-
-function saveFavorites(favs) {
-    localStorage.setItem("fav_rooms", JSON.stringify(favs));
-}
-
-function isFavorite(link) {
-    return getFavorites().some(f => f.link === link);
-}
-
-function toggleFavorite(name, link, players) {
-    let favs = getFavorites();
-    const idx = favs.findIndex(f => f.link === link);
-    if (idx >= 0) {
-        favs.splice(idx, 1);
-    } else {
-        favs.unshift({ name, link, players, addedAt: Date.now() });
-        if (favs.length > 30) favs = favs.slice(0, 30);
-    }
-    saveFavorites(favs);
-    return idx < 0;
-}
-
-function setupFavoritesPanel() {
-    favoritesHandler.setAttribute("id", "fav-panel");
-    favoritesHandler.style.cssText = "position:absolute;width:100%;height:100%;background:#111417;z-index:15;display:none;flex-direction:column;";
-    favoritesHandler.innerHTML = `
-        <div style="background:#0f1215;border-bottom:1px solid #1e2329;padding:12px 16px;display:flex;align-items:center;gap:10px;">
-            <button data-hook="fav-back" style="background:#1e2329;border:1px solid #2a3040;color:#cdd6e0;padding:6px 12px;border-radius:6px;font-size:0.8rem;">Back</button>
-            <span style="font-weight:bold;color:#fff;font-size:1rem;">Favorite Rooms</span>
-        </div>
-        <div data-hook="fav-list" style="flex:1;overflow-y:auto;padding:8px 0;"></div>
-    `;
-    document.body.appendChild(favoritesHandler);
-
-    favoritesHandler.querySelector('[data-hook="fav-back"]').addEventListener("click", function() {
-        favoritesHandler.style.display = "none";
-    });
-}
-
-function renderFavorites() {
-    const favs = getFavorites();
-    const list = favoritesHandler.querySelector('[data-hook="fav-list"]');
-
-    if (favs.length === 0) {
-        list.innerHTML = `
-            <div style="text-align:center;padding:40px 20px;color:#8a9bb0;">
-                <div style="font-size:2rem;margin-bottom:10px;">★</div>
-                <div style="font-size:0.9rem;">No favorite rooms yet.</div>
-                <div style="font-size:0.75rem;margin-top:6px;">Tap the star on any room to add it.</div>
-            </div>
-        `;
-        return;
-    }
-
-    list.innerHTML = favs.map((f, i) => `
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #1e2329;" data-fav-index="${i}">
-            <div style="flex:1;min-width:0;">
-                <div style="font-size:0.85rem;color:#cdd6e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div>
-                <div style="font-size:0.7rem;color:#8a9bb0;margin-top:2px;">${f.players || ''}</div>
-            </div>
-            <button data-fav-join="${i}" style="background:#2a3040;color:#cdd6e0;border:1px solid #3a4050;padding:5px 12px;border-radius:6px;font-size:0.78rem;white-space:nowrap;">Join</button>
-            <button data-fav-remove="${i}" style="background:transparent;color:#c13535;border:1px solid #c1353555;padding:5px 10px;border-radius:6px;font-size:0.78rem;">✕</button>
-        </div>
-    `).join('');
-
-    list.querySelectorAll('[data-fav-join]').forEach(btn => {
-        btn.addEventListener("click", function() {
-            const idx = parseInt(this.getAttribute("data-fav-join"));
-            const fav = getFavorites()[idx];
-            if (fav) openHaxballURL(fav.link);
-        });
-    });
-
-    list.querySelectorAll('[data-fav-remove]').forEach(btn => {
-        btn.addEventListener("click", function() {
-            const idx = parseInt(this.getAttribute("data-fav-remove"));
-            const favs = getFavorites();
-            favs.splice(idx, 1);
-            saveFavorites(favs);
-            renderFavorites();
-            refreshStarsInRoomlist();
-        });
-    });
-}
-
-function showFavorites() {
-    renderFavorites();
-    favoritesHandler.style.display = "flex";
-}
-
-function addStarsToRoomlist() {
-    const rows = body.querySelectorAll('tbody tr');
-    rows.forEach(row => {
-        if (row.querySelector('.fav-star-btn')) return;
-        const nameSpan = row.querySelector('span[data-hook="name"]');
-        if (!nameSpan) return;
-
-        const name = nameSpan.textContent;
-        const linkAttr = row.getAttribute('data-link') || row.querySelector('td')?.getAttribute('data-link') || '';
-
-        // Intentar obtener el link desde el click handler de la fila
-        const starBtn = document.createElement("button");
-        starBtn.className = "fav-star-btn";
-        starBtn.style.cssText = "background:transparent;border:none;color:#ffcc00;font-size:1rem;padding:0 6px;cursor:pointer;opacity:0.4;transition:opacity 0.2s;";
-        starBtn.innerHTML = "★";
-
-        // Guardar datos en el botón
-        starBtn.dataset.name = name;
-
-        const updateStarState = (link) => {
-            if (!link) return;
-            starBtn.dataset.link = link;
-            starBtn.style.opacity = isFavorite(link) ? "1" : "0.4";
-        };
-
-        // Interceptar click en la fila para capturar el link
-        row.addEventListener("click", function(e) {
-            // No hacer nada si el click fue en el botón de estrella
-        }, true);
-
-        starBtn.addEventListener("click", function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            const link = this.dataset.link;
-            if (!link) return;
-            const players = row.querySelector('td:last-child')?.textContent || '';
-            const added = toggleFavorite(this.dataset.name, link, players);
-            this.style.opacity = added ? "1" : "0.4";
-        });
-
-        // Insertar estrella en la primera celda
-        const firstTd = row.querySelector('td');
-        if (firstTd) firstTd.prepend(starBtn);
-
-        // Capturar el link cuando la fila recibe un mousedown/touchstart
-        row.addEventListener("mousedown", captureRowLink.bind(null, row, starBtn), { once: false });
-        row.addEventListener("touchstart", captureRowLink.bind(null, row, starBtn), { once: false });
-    });
-}
-
-function captureRowLink(row, starBtn) {
-    // El link se puede extraer del onclick de la fila o de atributos
-    try {
-        const onclickStr = row.getAttribute("onclick") || "";
-        const match = onclickStr.match(/[?&]c=([^'"&]+)/);
-        if (match) {
-            const link = "https://www.haxball.com/play?c=" + match[1];
-            starBtn.dataset.link = link;
-            starBtn.style.opacity = isFavorite(link) ? "1" : "0.4";
-            return;
-        }
-
-        // Alternativa: escuchar el evento de navegación
-        const originalClick = row.onclick;
-        if (originalClick) {
-            const fnStr = originalClick.toString();
-            const m = fnStr.match(/[?&]c=([^'"&\s]+)/);
-            if (m) {
-                const link = "https://www.haxball.com/play?c=" + m[1];
-                starBtn.dataset.link = link;
-                starBtn.style.opacity = isFavorite(link) ? "1" : "0.4";
-            }
-        }
-    } catch {}
-}
-
-function refreshStarsInRoomlist() {
-    body.querySelectorAll('.fav-star-btn').forEach(btn => {
-        if (btn.dataset.link) {
-            btn.style.opacity = isFavorite(btn.dataset.link) ? "1" : "0.4";
-        }
-    });
-}
-
-function createFavButton() {
-    if (getByDataHook('favbtn')) return;
-    let btn = document.createElement("button");
-    btn.setAttribute("data-hook", "favbtn");
-    btn.innerHTML = '★ Favorites';
-    btn.style.color = "#ffcc00";
-    btn.addEventListener("click", showFavorites);
-    const container = body.querySelector(".roomlist-view .buttons");
-    if (container) container.prepend(btn);
-}
-
 ///////////////////////////////////////// CHANGELOG /////////////////////////////////////////
 function setupChangelog() {
     changelogHandler.style.cssText = "position:absolute;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:50;display:none;justify-content:center;align-items:center;";
@@ -292,12 +102,12 @@ function setupChangelog() {
             </div>
             <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
                 ${[
-                    ["FPS Counter", "Overlay activable desde Mod Options."],
-                    ["Mod Options", "Submenú en Settings con todas las opciones del mod."],
-                    ["Background", "Fondo custom por color o imagen URL."],
-                    ["Turbo Kick", "Botón de disparo automático con velocidad ajustable."],
-                    ["Roomlist", "Nuevo diseño oscuro y limpio."],
-                    ["Favorites", "Guardá tus salas favoritas con la estrella y accedé desde el botón Favorites."],
+                    ["FPS Counter", "Overlay activable desde Mod Options. Verde, amarillo o rojo según rendimiento."],
+                    ["Mod Options", "Nuevo submenú en Settings que agrupa todas las opciones del mod."],
+                    ["Background", "Cambiá el fondo del juego por un color custom o una imagen via URL."],
+                    ["Turbo Kick", "Botón extra arriba del disparo que dispara automáticamente al mantener. Velocidad ajustable."],
+                    ["Camera Zoom", "Slider para ajustar el nivel de zoom de la cámara desde Mod Options."],
+                    ["Roomlist", "Nuevo diseño oscuro y más limpio de la lista de salas."],
                 ].map(([title, desc]) => `
                     <div style="display:flex;gap:10px;align-items:flex-start;">
                         <div style="width:6px;height:6px;border-radius:50%;background:#43b581;margin-top:5px;flex-shrink:0;"></div>
@@ -313,6 +123,7 @@ function setupChangelog() {
             </div>
         </div>
     `;
+
     document.body.appendChild(changelogHandler);
     changelogHandler.querySelector('[data-hook="closelog"]').addEventListener("click", function() {
         changelogHandler.style.display = "none";
@@ -321,7 +132,8 @@ function setupChangelog() {
 }
 
 function showChangelogIfNew() {
-    if (localStorage.getItem("last_seen_version") !== MOD_VERSION) {
+    const lastSeen = localStorage.getItem("last_seen_version");
+    if (lastSeen !== MOD_VERSION) {
         changelogHandler.style.display = "flex";
     }
 }
@@ -348,7 +160,6 @@ function init() {
     setupFPS();
     setupModsOptions();
     setupChangelog();
-    setupFavoritesPanel();
     setupCopyright(true);
     hideButtons.remove();
 
@@ -362,7 +173,7 @@ function init() {
 
     aboutHandler.setAttribute('data-hook', 'about');
     aboutHandler.style.cssText = 'background:#111417;position:absolute;width:100%;height:100%;display:none;justify-content:center;flex-direction:column;align-items:center;margin:0;';
-    aboutHandler.innerHTML = '<div class="dialog basic-dialog" style="max-width:50%;"><h1>About us</h1><p>We are Vixel Dev.</p><div class="buttons"><button data-hook="closeabout">Close</button></div></div>';
+    aboutHandler.innerHTML = '<div class="dialog basic-dialog" style="max-width:50%;"><h1>About us</h1><p>We are Vixel Dev, a small development studio that wants the Haxball community to grow, without hurting its owners.</p><p>To contact us:</p><p>E-mail: vixeldev@gmail.com</p><p>Instagram: @haxballmobile</p><div class="buttons"><button data-hook="closeabout">Close</button></div></div>';
 
     body.parentNode.appendChild(aboutHandler);
     if (localStorage.getItem("firstTime") === null) {
@@ -438,11 +249,8 @@ function updateUI() {
         if (!getByDataHook('url-room')) createURLButton();
         if (!getByDataHook('fil-cou')) createCountryButton();
         if (!getByDataHook('aboutbtn')) createAboutButton();
-        if (!getByDataHook('favbtn')) createFavButton();
         if (getByDataHook('count')) getByDataHook('count').remove();
         showControls(false);
-        // Agregar estrellas a las filas
-        setTimeout(addStarsToRoomlist, 300);
     } else if (body.querySelector('.create-room-view')) {
         copyright(true);
         showControls(false);
@@ -558,13 +366,17 @@ function createAboutButton() {
     button.innerHTML = '<i class="icon-link"></i><div>Discord</div>';
     button.style.backgroundColor = "#5865F2";
     button.style.color = "white";
+    button.style.transition = "all 0.3s ease";
     button.addEventListener("click", function() {
         const discordURL = "https://discord.gg/q27tF7CG5";
         navigator.clipboard.writeText(discordURL).then(() => {
-            const orig = button.innerHTML;
+            const originalHTML = button.innerHTML;
             button.innerHTML = '<i class="icon-ok"></i><div>Copied!</div>';
             button.style.backgroundColor = "#43b581";
-            setTimeout(() => { button.innerHTML = orig; button.style.backgroundColor = "#5865F2"; }, 1500);
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.style.backgroundColor = "#5865F2";
+            }, 1500);
         }).catch(() => { alert("Link: " + discordURL); });
     });
     let container = body.querySelector(".roomlist-view .buttons");
@@ -625,8 +437,9 @@ function setupModsOptions() {
     modsOptionsHandler.setAttribute("hidden", "");
     modsOptionsHandler.style.zIndex = "25";
 
-    const savedRate = localStorage.getItem("turbo_rate") || "80";
-    const fpsOn     = localStorage.getItem("fps_enabled") === "1";
+    const savedZoom  = localStorage.getItem("resolution_scale") || "1.0";
+    const savedRate  = localStorage.getItem("turbo_rate") || "80";
+    const fpsOn      = localStorage.getItem("fps_enabled") === "1";
 
     modsOptionsHandler.innerHTML = `
         <div class="dialog settings-view" style="height:min-content;max-width:420px;width:95%;margin:auto;position:relative;top:50%;transform:translateY(-50%);overflow-y:auto;max-height:90vh;">
@@ -634,6 +447,8 @@ function setupModsOptions() {
             <button data-hook="closemods" style="position:absolute;top:12px;right:10px">Back</button>
             <div class="tabcontents">
                 <div class="section selected" style="flex-direction:column;gap:10px;padding:12px">
+
+                    <!-- FPS -->
                     <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
                         <div>
                             <div style="font-weight:bold;font-size:0.9rem">FPS Counter</div>
@@ -641,6 +456,8 @@ function setupModsOptions() {
                         </div>
                         <button data-hook="fps-toggle-btn" style="min-width:70px;background:${fpsOn?'#43b581':'#2a3040'}">${fpsOn?'ON':'OFF'}</button>
                     </div>
+
+                    <!-- Background -->
                     <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
                         <div>
                             <div style="font-weight:bold;font-size:0.9rem">Background</div>
@@ -648,6 +465,8 @@ function setupModsOptions() {
                         </div>
                         <button data-hook="bg-open-btn" style="min-width:70px;background:#2a3040">Edit</button>
                     </div>
+
+                    <!-- Turbo Rate -->
                     <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
                         <div>
                             <div style="font-weight:bold;font-size:0.9rem">Turbo Rate</div>
@@ -658,7 +477,25 @@ function setupModsOptions() {
                             <input data-hook="turbo-rate-slider" class="slider" type="range" min="30" max="200" step="10" value="${savedRate}" style="width:80px">
                         </div>
                     </div>
+
+                    <!-- Camera Zoom -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
+                        <div>
+                            <div style="font-weight:bold;font-size:0.9rem">Camera Zoom</div>
+                            <div style="color:#8a9bb0;font-size:0.75rem">Needs reload to apply</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <div data-hook="zoom-val" style="width:35px;text-align:center;font-size:0.85rem">${parseFloat(savedZoom).toFixed(2)}</div>
+                            <input data-hook="zoom-slider" class="slider" type="range" min="0.5" max="2.0" step="0.05" value="${savedZoom}" style="width:80px">
+                        </div>
+                    </div>
+
+                    <!-- Apply zoom button -->
+                    <button data-hook="zoom-apply-btn" style="width:100%;background:#2a3040;border-radius:8px;padding:10px;font-size:0.85rem;">Apply Zoom & Reload</button>
+
+                    <!-- Changelog -->
                     <button data-hook="changelog-btn" style="width:100%;background:#1a1f24;border:1px solid #2a3040;border-radius:8px;padding:10px;font-size:0.85rem;color:#8a9bb0;">View changelog v${MOD_VERSION}</button>
+
                 </div>
             </div>
         </div>
@@ -669,21 +506,41 @@ function setupModsOptions() {
     modsOptionsHandler.querySelector('[data-hook="closemods"]').addEventListener("click", function() {
         modsOptionsHandler.setAttribute("hidden", "");
     });
+
     modsOptionsHandler.querySelector('[data-hook="fps-toggle-btn"]').addEventListener("click", function() {
         const newState = !fpsActive;
         toggleFPS(newState);
         this.innerHTML = newState ? "ON" : "OFF";
         this.style.background = newState ? "#43b581" : "#2a3040";
     });
+
     modsOptionsHandler.querySelector('[data-hook="bg-open-btn"]').addEventListener("click", function() {
         backgroundOptionsHandler.removeAttribute("hidden");
     });
+
     const turboSlider = modsOptionsHandler.querySelector('[data-hook="turbo-rate-slider"]');
     const turboVal    = modsOptionsHandler.querySelector('[data-hook="turbo-rate-val"]');
     turboSlider.addEventListener("input", function() {
         turboVal.innerHTML = this.value;
         localStorage.setItem("turbo_rate", this.value);
     });
+
+    const zoomSlider = modsOptionsHandler.querySelector('[data-hook="zoom-slider"]');
+    const zoomVal    = modsOptionsHandler.querySelector('[data-hook="zoom-val"]');
+    zoomSlider.addEventListener("input", function() {
+        const val = parseFloat(this.value).toFixed(2);
+        zoomVal.innerHTML = val;
+        localStorage.setItem("resolution_scale", val);
+        try { gameFrame.localStorage.setItem("resolution_scale", val); } catch {}
+    });
+
+    modsOptionsHandler.querySelector('[data-hook="zoom-apply-btn"]').addEventListener("click", function() {
+        const val = parseFloat(zoomSlider.value).toFixed(2);
+        localStorage.setItem("resolution_scale", val);
+        try { gameFrame.localStorage.setItem("resolution_scale", val); } catch {}
+        location.reload();
+    });
+
     modsOptionsHandler.querySelector('[data-hook="changelog-btn"]').addEventListener("click", function() {
         changelogHandler.style.display = "flex";
     });
@@ -709,6 +566,7 @@ function createModsButton() {
 ///////////////////////////////////////// BACKGROUND /////////////////////////////////////////
 function setupBackground() {
     gameFrame.document.head.appendChild(backgroundHandler);
+
     backgroundOptionsHandler.setAttribute("class", "input-options");
     backgroundOptionsHandler.setAttribute("hidden", "");
     backgroundOptionsHandler.style.zIndex = "30";
@@ -754,30 +612,51 @@ function setupBackground() {
             </div>
         </div>
     `;
+
     body.parentNode.appendChild(backgroundOptionsHandler);
+
     backgroundOptionsHandler.querySelector('[data-hook="closebg"]').addEventListener("click", function() {
         backgroundOptionsHandler.setAttribute("hidden", "");
     });
-    const tabs   = { color: backgroundOptionsHandler.querySelector('[data-hook="bg-tab-color"]'), image: backgroundOptionsHandler.querySelector('[data-hook="bg-tab-image"]'), none: backgroundOptionsHandler.querySelector('[data-hook="bg-tab-none"]') };
-    const panels = { color: backgroundOptionsHandler.querySelector('[data-hook="bg-panel-color"]'), image: backgroundOptionsHandler.querySelector('[data-hook="bg-panel-image"]') };
+
+    const tabs = {
+        color: backgroundOptionsHandler.querySelector('[data-hook="bg-tab-color"]'),
+        image: backgroundOptionsHandler.querySelector('[data-hook="bg-tab-image"]'),
+        none:  backgroundOptionsHandler.querySelector('[data-hook="bg-tab-none"]'),
+    };
+    const panels = {
+        color: backgroundOptionsHandler.querySelector('[data-hook="bg-panel-color"]'),
+        image: backgroundOptionsHandler.querySelector('[data-hook="bg-panel-image"]'),
+    };
+
     function setTab(active) {
         Object.keys(tabs).forEach(k => tabs[k].style.opacity = k === active ? "1" : "0.5");
         Object.keys(panels).forEach(k => panels[k].style.display = k === active ? "flex" : "none");
     }
+
     tabs.color.addEventListener("click", () => setTab("color"));
     tabs.image.addEventListener("click", () => setTab("image"));
     tabs.none.addEventListener("click",  () => { setTab("none"); applyBackground("none"); });
+
     const opacitySlider = backgroundOptionsHandler.querySelector('[data-hook="bg-opacity-slider"]');
     const opacityVal    = backgroundOptionsHandler.querySelector('[data-hook="bg-opacity-val"]');
-    opacitySlider.addEventListener("input", () => { opacityVal.innerHTML = parseFloat(opacitySlider.value).toFixed(2); });
+    opacitySlider.addEventListener("input", () => {
+        opacityVal.innerHTML = parseFloat(opacitySlider.value).toFixed(2);
+    });
+
     backgroundOptionsHandler.querySelector('[data-hook="bg-apply-color"]').addEventListener("click", function() {
-        applyBackground("color", { color: backgroundOptionsHandler.querySelector('[data-hook="bg-color-picker"]').value, opacity: opacitySlider.value });
+        const color   = backgroundOptionsHandler.querySelector('[data-hook="bg-color-picker"]').value;
+        const opacity = opacitySlider.value;
+        applyBackground("color", { color, opacity });
     });
+
     backgroundOptionsHandler.querySelector('[data-hook="bg-apply-image"]').addEventListener("click", function() {
-        const url = backgroundOptionsHandler.querySelector('[data-hook="bg-image-url"]').value.trim();
+        const url  = backgroundOptionsHandler.querySelector('[data-hook="bg-image-url"]').value.trim();
+        const size = backgroundOptionsHandler.querySelector('[data-hook="bg-image-size"]').value;
         if (!url) return;
-        applyBackground("image", { url, size: backgroundOptionsHandler.querySelector('[data-hook="bg-image-size"]').value });
+        applyBackground("image", { url, size });
     });
+
     const saved = JSON.parse(localStorage.getItem("bg_config") || "null");
     if (saved) _doApply(saved);
 }
@@ -805,7 +684,8 @@ function _doApply(cfg) {
 
 ///////////////////////////////////////// CHAT /////////////////////////////////////////
 function prefabMessage(msg) {
-    const input = body.querySelector('.chatbox-view').querySelector('input');
+    const chatbox = body.querySelector('.chatbox-view');
+    const input = chatbox.querySelector('input');
     input.focus();
     input.value = msg;
     input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true, keyCode: 13, which: 13 }));
@@ -815,7 +695,9 @@ function updatedChat() {
     const log = getByDataHook('log');
     const children = log.firstChild.children;
     if (lastMessage !== log.firstChild.lastChild) {
-        if (children.length > 5) for (let i = 0; i < children.length - 5; i++) children[i].style.display = "none";
+        if (children.length > 5) {
+            for (let i = 0; i < children.length - 5; i++) children[i].style.display = "none";
+        }
         const lastChild = log.firstChild.lastChild;
         lastChild.style.opacity = 1;
         setTimeout(() => { lastChild.classList.add("fade-out"); lastChild.removeAttribute("style"); }, 500);
@@ -833,8 +715,15 @@ function chatToggle() {
 
 ///////////////////////////////////////// CONTROLS /////////////////////////////////////////
 function showControls(v) {
-    if (v) { joystick.setAttribute("view","visible"); kickButton.setAttribute("view","visible"); turboButton.setAttribute("view","visible"); }
-    else   { joystick.setAttribute("view","hidden");  kickButton.setAttribute("view","hidden");  turboButton.setAttribute("view","hidden"); }
+    if (v) {
+        joystick.setAttribute("view", "visible");
+        kickButton.setAttribute("view", "visible");
+        turboButton.setAttribute("view", "visible");
+    } else {
+        joystick.setAttribute("view", "hidden");
+        kickButton.setAttribute("view", "hidden");
+        turboButton.setAttribute("view", "hidden");
+    }
 }
 
 function updateControlsSettingsNumbers() {
@@ -884,7 +773,8 @@ function updateJoystick(touch) {
     const distance = Math.min(joystick.clientWidth / 2, Math.hypot(deltaX, deltaY));
     thumb.style.left = (centerX + distance * Math.cos(angle)) - rect.left - thumb.clientWidth / 2 + 'px';
     thumb.style.top  = (centerY + distance * Math.sin(angle)) - rect.top  - thumb.clientHeight / 2 + 'px';
-    emulateKeys(["d","sd","s","sa","a","wa","w","wd"][Math.round((((angle + 2*Math.PI) % (2*Math.PI)) * 180/Math.PI) / 45) % 8]);
+    const joystickValue = Math.round((((angle + 2 * Math.PI) % (2 * Math.PI)) * 180 / Math.PI) / 45) % 8;
+    emulateKeys(["d","sd","s","sa","a","wa","w","wd"][joystickValue]);
 }
 
 function resetJoystick() {
@@ -894,13 +784,13 @@ function resetJoystick() {
 }
 
 function emulateKeys(str) {
-    let keys = { "w":"keyup","a":"keyup","s":"keyup","d":"keyup" };
+    let keys = { "w": "keyup", "a": "keyup", "s": "keyup", "d": "keyup" };
     for (var i = 0; i < str.length; i++) keys[str[i]] = "keydown";
     try {
-        gameFrame.document.dispatchEvent(new KeyboardEvent(keys['w'], { code:"KeyW" }));
-        gameFrame.document.dispatchEvent(new KeyboardEvent(keys['a'], { code:"KeyA" }));
-        gameFrame.document.dispatchEvent(new KeyboardEvent(keys['s'], { code:"KeyS" }));
-        gameFrame.document.dispatchEvent(new KeyboardEvent(keys['d'], { code:"KeyD" }));
+        gameFrame.document.dispatchEvent(new KeyboardEvent(keys['w'], { code: "KeyW" }));
+        gameFrame.document.dispatchEvent(new KeyboardEvent(keys['a'], { code: "KeyA" }));
+        gameFrame.document.dispatchEvent(new KeyboardEvent(keys['s'], { code: "KeyS" }));
+        gameFrame.document.dispatchEvent(new KeyboardEvent(keys['d'], { code: "KeyD" }));
     } catch {}
 }
 
@@ -953,7 +843,10 @@ function setupControls() {
         e.preventDefault();
         kick('keydown');
         const rate = parseInt(localStorage.getItem("turbo_rate") || "80");
-        turboInterval = setInterval(function() { kick('keyup'); setTimeout(function() { kick('keydown'); }, 20); }, rate);
+        turboInterval = setInterval(function() {
+            kick('keyup');
+            setTimeout(function() { kick('keydown'); }, 20);
+        }, rate);
     });
     turboButton.addEventListener('touchend', function(e) {
         e.preventDefault();
