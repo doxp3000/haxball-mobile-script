@@ -181,6 +181,94 @@ function showFavorites() {
     favoritesHandler.style.display = "flex";
 }
 
+// ✅ FIXED: Extract room link from React fiber or any available DOM attribute
+function extractLinkFromRow(row) {
+    // Method 1: direct attribute on the row
+    const directAttrs = ['data-link', 'data-href', 'data-id', 'data-room-id'];
+    for (const attr of directAttrs) {
+        const val = row.getAttribute(attr);
+        if (val) return val.startsWith('http') ? val : "https://www.haxball.com/play?c=" + val;
+    }
+
+    // Method 2: attributes on child cells
+    for (const td of row.querySelectorAll('td')) {
+        for (const attr of directAttrs) {
+            const val = td.getAttribute(attr);
+            if (val) return val.startsWith('http') ? val : "https://www.haxball.com/play?c=" + val;
+        }
+    }
+
+    // Method 3: onclick string parsing
+    const onclickStr = row.getAttribute('onclick') || '';
+    const matchFull = onclickStr.match(/https?:\/\/[^\s'"]+haxball[^\s'"]+/);
+    if (matchFull) return matchFull[0];
+    const matchCode = onclickStr.match(/[?&]c=([^'"&\s)]+)/);
+    if (matchCode) return "https://www.haxball.com/play?c=" + matchCode[1];
+
+    // Method 4: React fiber traversal (HaxBall uses React internally)
+    try {
+        const fiberKey = Object.keys(row).find(k =>
+            k.startsWith('__reactFiber') || k.startsWith('__reactInternalInstance')
+        );
+        if (fiberKey) {
+            let fiber = row[fiberKey];
+            let depth = 0;
+            while (fiber && depth < 20) {
+                const props = fiber.memoizedProps || fiber.pendingProps;
+                if (props) {
+                    // Direct link/id props
+                    if (typeof props.link === 'string' && props.link.length > 3) {
+                        return props.link.startsWith('http') ? props.link : "https://www.haxball.com/play?c=" + props.link;
+                    }
+                    if (props.room && typeof props.room.link === 'string') {
+                        return "https://www.haxball.com/play?c=" + props.room.link;
+                    }
+                    if (props.room && typeof props.room.id === 'string') {
+                        return "https://www.haxball.com/play?c=" + props.room.id;
+                    }
+                    // onClick handler string parsing
+                    if (typeof props.onClick === 'function') {
+                        const fnStr = props.onClick.toString();
+                        const m = fnStr.match(/[?&]c=([^'"&\s)]+)/);
+                        if (m) return "https://www.haxball.com/play?c=" + m[1];
+                        // Try to find any room code pattern
+                        const m2 = fnStr.match(/["']([A-Za-z0-9_-]{10,})["']/);
+                        if (m2) return "https://www.haxball.com/play?c=" + m2[1];
+                    }
+                    // Check for stateNode with room data
+                    if (fiber.stateNode && fiber.stateNode.props) {
+                        const sp = fiber.stateNode.props;
+                        if (sp.link) return sp.link.startsWith('http') ? sp.link : "https://www.haxball.com/play?c=" + sp.link;
+                        if (sp.room && sp.room.link) return "https://www.haxball.com/play?c=" + sp.room.link;
+                    }
+                }
+                fiber = fiber.return;
+                depth++;
+            }
+        }
+    } catch(err) {}
+
+    // Method 5: scan all internal JS keys of the row element for room data
+    try {
+        const jsKeys = Object.keys(row).filter(k => !k.startsWith('__react'));
+        for (const key of jsKeys) {
+            try {
+                const val = row[key];
+                if (val && typeof val === 'object') {
+                    const str = JSON.stringify(val);
+                    const m = str.match(/haxball\.com\/play\?c=([^"\\]+)/);
+                    if (m) return "https://www.haxball.com/play?c=" + m[1];
+                    const m2 = str.match(/"link"\s*:\s*"([^"]+)"/);
+                    if (m2) return m2[1].startsWith('http') ? m2[1] : "https://www.haxball.com/play?c=" + m2[1];
+                }
+            } catch {}
+        }
+    } catch {}
+
+    return null;
+}
+
+// ✅ FIXED: addStarsToRoomlist now uses extractLinkFromRow
 function addStarsToRoomlist() {
     const rows = body.querySelectorAll('tbody tr');
     rows.forEach(row => {
@@ -188,73 +276,53 @@ function addStarsToRoomlist() {
         const nameSpan = row.querySelector('span[data-hook="name"]');
         if (!nameSpan) return;
 
-        const name = nameSpan.textContent;
-        const linkAttr = row.getAttribute('data-link') || row.querySelector('td')?.getAttribute('data-link') || '';
-
-        // Intentar obtener el link desde el click handler de la fila
         const starBtn = document.createElement("button");
         starBtn.className = "fav-star-btn";
-        starBtn.style.cssText = "background:transparent;border:none;color:#ffcc00;font-size:1rem;padding:0 6px;cursor:pointer;opacity:0.4;transition:opacity 0.2s;";
+        starBtn.style.cssText = "background:transparent;border:none;color:#ffcc00;font-size:1rem;padding:0 6px;cursor:pointer;opacity:0.4;transition:opacity 0.2s;flex-shrink:0;";
         starBtn.innerHTML = "★";
+        starBtn.dataset.name = nameSpan.textContent;
 
-        // Guardar datos en el botón
-        starBtn.dataset.name = name;
-
-        const updateStarState = (link) => {
-            if (!link) return;
-            starBtn.dataset.link = link;
-            starBtn.style.opacity = isFavorite(link) ? "1" : "0.4";
-        };
-
-        // Interceptar click en la fila para capturar el link
-        row.addEventListener("click", function(e) {
-            // No hacer nada si el click fue en el botón de estrella
-        }, true);
+        // Try to resolve the link immediately at star creation time
+        const linkNow = extractLinkFromRow(row);
+        if (linkNow) {
+            starBtn.dataset.link = linkNow;
+            starBtn.style.opacity = isFavorite(linkNow) ? "1" : "0.4";
+        }
 
         starBtn.addEventListener("click", function(e) {
             e.stopPropagation();
             e.preventDefault();
-            const link = this.dataset.link;
-            if (!link) return;
+
+            // Re-try extraction in case it wasn't available at creation time
+            let link = this.dataset.link;
+            if (!link) {
+                link = extractLinkFromRow(row);
+                if (link) this.dataset.link = link;
+            }
+
+            if (!link) {
+                // Last resort: show a small prompt to paste the URL manually
+                const manual = prompt("No se pudo detectar el link automáticamente.\nPegá la URL de la sala (ej: https://www.haxball.com/play?c=XXXX):");
+                if (manual && manual.includes("haxball")) {
+                    link = manual.trim();
+                    this.dataset.link = link;
+                } else {
+                    return;
+                }
+            }
+
             const players = row.querySelector('td:last-child')?.textContent || '';
             const added = toggleFavorite(this.dataset.name, link, players);
             this.style.opacity = added ? "1" : "0.4";
         });
 
-        // Insertar estrella en la primera celda
         const firstTd = row.querySelector('td');
-        if (firstTd) firstTd.prepend(starBtn);
-
-        // Capturar el link cuando la fila recibe un mousedown/touchstart
-        row.addEventListener("mousedown", captureRowLink.bind(null, row, starBtn), { once: false });
-        row.addEventListener("touchstart", captureRowLink.bind(null, row, starBtn), { once: false });
+        if (firstTd) {
+            firstTd.style.display = "flex";
+            firstTd.style.alignItems = "center";
+            firstTd.prepend(starBtn);
+        }
     });
-}
-
-function captureRowLink(row, starBtn) {
-    // El link se puede extraer del onclick de la fila o de atributos
-    try {
-        const onclickStr = row.getAttribute("onclick") || "";
-        const match = onclickStr.match(/[?&]c=([^'"&]+)/);
-        if (match) {
-            const link = "https://www.haxball.com/play?c=" + match[1];
-            starBtn.dataset.link = link;
-            starBtn.style.opacity = isFavorite(link) ? "1" : "0.4";
-            return;
-        }
-
-        // Alternativa: escuchar el evento de navegación
-        const originalClick = row.onclick;
-        if (originalClick) {
-            const fnStr = originalClick.toString();
-            const m = fnStr.match(/[?&]c=([^'"&\s]+)/);
-            if (m) {
-                const link = "https://www.haxball.com/play?c=" + m[1];
-                starBtn.dataset.link = link;
-                starBtn.style.opacity = isFavorite(link) ? "1" : "0.4";
-            }
-        }
-    } catch {}
 }
 
 function refreshStarsInRoomlist() {
@@ -441,7 +509,6 @@ function updateUI() {
         if (!getByDataHook('favbtn')) createFavButton();
         if (getByDataHook('count')) getByDataHook('count').remove();
         showControls(false);
-        // Agregar estrellas a las filas
         setTimeout(addStarsToRoomlist, 300);
     } else if (body.querySelector('.create-room-view')) {
         copyright(true);
