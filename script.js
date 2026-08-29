@@ -474,6 +474,8 @@ function setupGameUI() {
         const inputStyle = chat.querySelector('.input').style;
         inputStyle.display = 'none';
         chat.querySelector('input').addEventListener('blur', function() { inputStyle.display = 'none'; });
+        const savedAvatar = localStorage.getItem("avatar_value");
+        if (savedAvatar) setTimeout(function() { applyAvatar(savedAvatar); }, 500);
         firstTime = false;
     }
 }
@@ -487,6 +489,8 @@ function setupModsOptions() {
     const savedRate = localStorage.getItem("turbo_rate") || "80";
     const fpsOn     = localStorage.getItem("fps_enabled") === "1";
     const turboOn   = turboEnabled;
+    const savedAvatar = localStorage.getItem("avatar_value") || "";
+    const avatarEmojis = ["⚽","🔥","⭐","😎","👑","💀","🤖","⚡"];
 
     modsOptionsHandler.innerHTML = `
         <div class="dialog settings-view" style="height:min-content;max-width:420px;width:95%;margin:auto;position:relative;top:50%;transform:translateY(-50%);overflow-y:auto;max-height:90vh;">
@@ -526,6 +530,17 @@ function setupModsOptions() {
                         </div>
                     </div>
                     <button data-hook="changelog-btn" style="width:100%;background:#1a1f24;border:1px solid #2a3040;border-radius:8px;padding:10px;font-size:0.85rem;color:#8a9bb0;">View changelog v${MOD_VERSION}</button>
+                    <div style="display:flex;flex-direction:column;gap:8px;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
+                        <div style="font-weight:bold;font-size:0.9rem">Avatar</div>
+                        <div style="color:#8a9bb0;font-size:0.7rem">Haxball solo admite un emoji o texto corto como avatar (no imagenes completas). Se aplica solo con /avatar.</div>
+                        <div style="display:flex;gap:6px">
+                            <input data-hook="avatar-input" type="text" maxlength="3" placeholder="⚡" value="${savedAvatar}" style="flex:1;background:#0f1215;border:1px solid #2a3040;color:#cdd6e0;border-radius:6px;padding:6px 10px;text-align:center">
+                            <button data-hook="avatar-apply-btn" style="background:#43b581;min-width:70px">Aplicar</button>
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+                            ${avatarEmojis.map(e => `<button class="avatar-emoji-btn" data-emoji="${e}" style="width:34px;height:34px;font-size:1rem;background:#0f1215;border:1px solid #2a3040;border-radius:6px">${e}</button>`).join('')}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -559,6 +574,16 @@ function setupModsOptions() {
     });
     modsOptionsHandler.querySelector('[data-hook="changelog-btn"]').addEventListener("click", function() {
         changelogHandler.style.display = "flex";
+    });
+    modsOptionsHandler.querySelector('[data-hook="avatar-apply-btn"]').addEventListener("click", function() {
+        applyAvatar(modsOptionsHandler.querySelector('[data-hook="avatar-input"]').value.trim());
+    });
+    modsOptionsHandler.querySelectorAll('.avatar-emoji-btn').forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            const emoji = this.getAttribute("data-emoji");
+            modsOptionsHandler.querySelector('[data-hook="avatar-input"]').value = emoji;
+            applyAvatar(emoji);
+        });
     });
 }
 
@@ -682,6 +707,13 @@ function _doApply(cfg) {
 }
 
 ///////////////////////////////////////// CHAT /////////////////////////////////////////
+function applyAvatar(val) {
+    if (!val) return;
+    localStorage.setItem("avatar_value", val);
+    const chatEl = body.querySelector('.chatbox-view');
+    if (chatEl) prefabMessage("/avatar " + val);
+}
+
 function prefabMessage(msg) {
     const input = body.querySelector('.chatbox-view').querySelector('input');
     input.focus();
