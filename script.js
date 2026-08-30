@@ -168,6 +168,7 @@ function init() {
     setupFPS();
     setupModsOptions();
     setupChangelog();
+    setupAvatarOverlay();
     setupCopyright(true);
     hideButtons.remove();
 
@@ -491,6 +492,8 @@ function setupModsOptions() {
     const turboOn   = turboEnabled;
     const savedAvatar = localStorage.getItem("avatar_value") || "";
     const avatarEmojis = ["⚽","🔥","⭐","😎","👑","💀","🤖","⚡"];
+    const savedAvatarImg = localStorage.getItem("avatar_image") || "";
+    const avatarImgOn = localStorage.getItem("avatar_image_enabled") === "1";
 
     modsOptionsHandler.innerHTML = `
         <div class="dialog settings-view" style="height:min-content;max-width:420px;width:95%;margin:auto;position:relative;top:50%;transform:translateY(-50%);overflow-y:auto;max-height:90vh;">
@@ -541,6 +544,17 @@ function setupModsOptions() {
                             ${avatarEmojis.map(e => `<button class="avatar-emoji-btn" data-emoji="${e}" style="width:34px;height:34px;font-size:1rem;background:#0f1215;border:1px solid #2a3040;border-radius:6px">${e}</button>`).join('')}
                         </div>
                     </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;background:#1a1f24;padding:10px 14px;border-radius:8px;border:1px solid #2a3040">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div style="font-weight:bold;font-size:0.9rem">Imagen en mi ficha (experimental)</div>
+                            <button data-hook="avatarimg-toggle-btn" style="min-width:70px;background:${avatarImgOn?'#43b581':'#2a3040'}">${avatarImgOn?'ON':'OFF'}</button>
+                        </div>
+                        <div style="color:#8a9bb0;font-size:0.7rem">Solo la ves vos. Puede desalinearse un poco o dejar de andar si Haxball cambia el juego.</div>
+                        <div style="display:flex;gap:8px;align-items:center">
+                            <img data-hook="avatarimg-preview" src="${savedAvatarImg}" style="width:40px;height:40px;border-radius:50%;background:#0f1215;object-fit:cover;border:1px solid #2a3040;display:${savedAvatarImg ? 'block' : 'none'}">
+                            <input data-hook="avatarimg-file" type="file" accept="image/*" style="flex:1;font-size:0.7rem;color:#8a9bb0">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -584,6 +598,24 @@ function setupModsOptions() {
             modsOptionsHandler.querySelector('[data-hook="avatar-input"]').value = emoji;
             applyAvatar(emoji);
         });
+    });
+    modsOptionsHandler.querySelector('[data-hook="avatarimg-toggle-btn"]').addEventListener("click", function() {
+        const newState = localStorage.getItem("avatar_image_enabled") !== "1";
+        localStorage.setItem("avatar_image_enabled", newState ? "1" : "0");
+        this.innerHTML = newState ? "ON" : "OFF";
+        this.style.background = newState ? "#43b581" : "#2a3040";
+    });
+    modsOptionsHandler.querySelector('[data-hook="avatarimg-file"]').addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function() {
+            localStorage.setItem("avatar_image", reader.result);
+            const preview = modsOptionsHandler.querySelector('[data-hook="avatarimg-preview"]');
+            preview.src = reader.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
     });
 }
 
@@ -704,6 +736,82 @@ function _doApply(cfg) {
         css = `body{background:#111417!important;}`;
     }
     backgroundHandler.innerHTML = css;
+}
+
+///////////////////////////////////////// AVATAR OVERLAY (EXPERIMENTAL) /////////////////////////////////////////
+let ownNickname = "";
+let lastNickPos = null;
+let avatarOverlayEl = null;
+let avatarOverlayCanvas = null;
+
+function setupAvatarOverlay() {
+    try {
+        avatarOverlayEl = document.createElement('img');
+        avatarOverlayEl.setAttribute('id', 'avatar-overlay');
+        avatarOverlayEl.style.cssText = "position:fixed;width:36px;height:36px;border-radius:50%;object-fit:cover;pointer-events:none;z-index:9998;display:none;transform:translate(-50%,-100%);box-shadow:0 0 0 2px rgba(255,255,255,0.6);";
+        const savedImg = localStorage.getItem("avatar_image");
+        if (savedImg) avatarOverlayEl.src = savedImg;
+        document.body.appendChild(avatarOverlayEl);
+
+        const nickWatcher = setInterval(function() {
+            try {
+                const inp = gameFrame.document.querySelector('.choose-nickname-view input');
+                if (inp) {
+                    ownNickname = inp.value;
+                    if (!inp._avatarNickBound) {
+                        inp.addEventListener('input', function() { ownNickname = inp.value; });
+                        inp._avatarNickBound = true;
+                    }
+                }
+            } catch {}
+        }, 1000);
+
+        const hookWatcher = setInterval(function() {
+            try {
+                const canvas = gameFrame.document.querySelector('canvas');
+                if (canvas && !canvas._avatarHooked) {
+                    const ctx = canvas.getContext('2d');
+                    if (ctx && !ctx._avatarPatched) {
+                        const origFillText = ctx.fillText.bind(ctx);
+                        ctx.fillText = function(text, x, y, maxWidth) {
+                            if (ownNickname && typeof text === 'string' && text.indexOf(ownNickname) !== -1) {
+                                lastNickPos = { x: x, y: y };
+                            }
+                            return origFillText(text, x, y, maxWidth);
+                        };
+                        ctx._avatarPatched = true;
+                    }
+                    canvas._avatarHooked = true;
+                    avatarOverlayCanvas = canvas;
+                }
+            } catch {}
+        }, 1000);
+
+        requestAnimationFrame(updateAvatarOverlayPosition);
+    } catch {}
+}
+
+function updateAvatarOverlayPosition() {
+    try {
+        const enabled = localStorage.getItem("avatar_image_enabled") === "1";
+        const img = localStorage.getItem("avatar_image");
+        const iframeEl = document.querySelector('.gameframe');
+        if (enabled && img && lastNickPos && avatarOverlayCanvas && iframeEl && body.querySelector('.game-view')) {
+            if (avatarOverlayEl.src !== img) avatarOverlayEl.src = img;
+            const canvasRect = avatarOverlayCanvas.getBoundingClientRect();
+            const iframeRect = iframeEl.getBoundingClientRect();
+            const scaleX = canvasRect.width / avatarOverlayCanvas.width;
+            const scaleY = canvasRect.height / avatarOverlayCanvas.height;
+            const screenX = iframeRect.left + canvasRect.left + lastNickPos.x * scaleX;
+            const screenY = iframeRect.top + canvasRect.top + lastNickPos.y * scaleY;
+            avatarOverlayEl.style.left = screenX + "px";
+            avatarOverlayEl.style.top = (screenY - 4) + "px";
+            avatarOverlayEl.style.display = "block";
+        } else {
+            avatarOverlayEl.style.display = "none";
+        }
+    } catch {}
+    requestAnimationFrame(updateAvatarOverlayPosition);
 }
 
 ///////////////////////////////////////// CHAT /////////////////////////////////////////
